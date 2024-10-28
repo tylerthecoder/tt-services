@@ -19,7 +19,9 @@ export class TylersThings {
     ) {}
 
     static async make(): Promise<TylersThings> {
+
         const db = await DatabaseSingleton.getInstance();
+
         const dailyPlans = new DailyPlansService(db.getPlanCollection());
         const todo = new TodoService(db.getTodoCollection());
         const buyList = new BuyListService(db.getBuyListCollection());

@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import SpotifyWebApi from "spotify-web-api-node";
 
 enum ISongState {

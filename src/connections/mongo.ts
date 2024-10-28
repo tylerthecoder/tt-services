@@ -120,13 +120,27 @@ export class MongoDBService {
 export class DatabaseSingleton {
   private static instance: MongoDBService | null = null;
 
+  private static connectPromise: Promise<MongoDBService> | null = null;
+
   private constructor() {}
 
   public static async getInstance(): Promise<MongoDBService> {
-    if (!DatabaseSingleton.instance) {
-      DatabaseSingleton.instance = new MongoDBService();
-      await DatabaseSingleton.instance.connect();
+    if (DatabaseSingleton.instance) {
+      return DatabaseSingleton.instance;
     }
-    return DatabaseSingleton.instance;
+
+    let connectPromise = DatabaseSingleton.connectPromise;
+
+    if (!connectPromise) {
+      connectPromise = new Promise<MongoDBService>(async (resolve, reject) => {
+        const instance = new MongoDBService();
+        await instance.connect();
+        resolve(instance);
+      });
+      DatabaseSingleton.connectPromise = connectPromise;
+    }
+
+    const instance = await connectPromise;
+    return instance;
   }
 }

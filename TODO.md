@@ -7,7 +7,6 @@
 - Move spotify to the services repo
 - Move Creations to the services repo
 - Fix viewing blogs on the web app
-- Add ability to write notes and publish notes in the planner app
 - Move creds to the services repo
 - Move blog data from current db to tylers things db.
 - Just cleanup the mongo db in general (Update creds)

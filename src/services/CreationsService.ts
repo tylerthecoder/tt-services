@@ -8,6 +8,7 @@ export type Creation = {
     link: string;
     type: string;
     img: string;
+    published: boolean; // Add this field
     createdAt: string;
     updatedAt: string;
 }
@@ -50,6 +51,14 @@ export class CreationsService {
         return { ...newCreation, id: result.insertedId.toString() };
     }
 
+    async getCreationById(id: string): Promise<Creation> {
+        const result = await this.creationsCollection.findOne({ _id: new ObjectId(id) });
+        if (!result) {
+            throw new Error(`Creation with id ${id} not found`);
+        }
+        return { ...result, id: result._id.toString() };
+    }
+
     async updateCreation(id: string, update: Partial<Omit<Creation, 'id' | 'createdAt' | 'updatedAt'>>): Promise<Creation> {
         const updateDoc = {
             $set: {
@@ -71,5 +80,47 @@ export class CreationsService {
     async deleteCreation(id: string): Promise<boolean> {
         const result = await this.creationsCollection.deleteOne({ _id: new ObjectId(id) });
         return result.deletedCount === 1;
+    }
+
+    async publishCreation(id: string): Promise<Creation> {
+        const updateDoc = {
+            $set: {
+                published: true,
+                updatedAt: new Date().toISOString(),
+            },
+        };
+        const result = await this.creationsCollection.findOneAndUpdate(
+            { _id: new ObjectId(id) },
+            updateDoc,
+            { returnDocument: 'after' }
+        );
+        if (!result) {
+            throw new Error(`Creation with id ${id} not found`);
+        }
+        return { ...result, id: result._id.toString() };
+    }
+
+    async unpublishCreation(id: string): Promise<Creation> {
+        const updateDoc = {
+            $set: {
+                published: false,
+                updatedAt: new Date().toISOString(),
+            },
+        };
+        const result = await this.creationsCollection.findOneAndUpdate(
+            { _id: new ObjectId(id) },
+            updateDoc,
+            { returnDocument: 'after' }
+        );
+        if (!result) {
+            throw new Error(`Creation with id ${id} not found`);
+        }
+        return { ...result, id: result._id.toString() };
+    }
+
+    async getPublishedCreations(): Promise<Creation[]> {
+        const results = await this.creationsCollection.find({ published: true }).toArray();
+        console.log("Got published creations", results);
+        return results.map(result => ({ ...result, id: result._id.toString() }));
     }
 }
