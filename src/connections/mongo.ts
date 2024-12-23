@@ -7,6 +7,10 @@ import { BuyListItem } from '../services/BuyListService.ts';
 import { TalkNote } from '../services/TalkNotesService.ts';
 import { ReadingListItem } from '../services/ReadingListService.ts';
 import { Creation } from '../services/CreationsService.ts';
+import { Spark } from '../index.ts';
+import { Movie } from '../services/MoviesService.ts';
+import { Techie } from '../services/TechieService.ts';
+import { WeekendProject } from '../services/WeekendProjectService.ts';
 
 
 dotenv.config();
@@ -32,6 +36,10 @@ export class MongoDBService {
   private noteCollection?: Collection<NoId<Note>>;
   private planCollection?: Collection<NoId<Plan>>;
   private creationsCollection?: Collection<NoId<Creation>>;
+  private sparkCollection?: Collection<NoId<Spark>>;
+  private moviesCollection?: Collection<NoId<Movie>>;
+  private techieCollection?: Collection<NoId<Techie>>;
+  private weekendProjectCollection?: Collection<NoId<WeekendProject>>;
 
   constructor() {
     const uri = process.env.DB_URI;
@@ -56,6 +64,10 @@ export class MongoDBService {
       this.readingListCollection = database.collection<NoId<ReadingListItem>>(READING_LIST_COLLECTION_NAME);
       this.noteCollection = database.collection<NoId<Note>>(NOTES_COLLECTION_NAME);
       this.creationsCollection = database.collection<NoId<Creation>>('creations');
+      this.sparkCollection = database.collection<NoId<Spark>>('sparks');
+      this.moviesCollection = database.collection<NoId<Movie>>('movies');
+      this.techieCollection = database.collection<NoId<Techie>>('techies');
+      this.weekendProjectCollection = database.collection<NoId<WeekendProject>>('weekendprojects');
     } catch (error) {
       console.error('Error connecting to MongoDB:', error);
       throw error;
@@ -114,6 +126,34 @@ export class MongoDBService {
       throw new Error('MongoDB creations collection is not initialized. Did you forget to call connect()?');
     }
     return this.creationsCollection;
+  }
+
+  getSparkCollection(): Collection<NoId<Spark>> {
+    if (!this.sparkCollection) {
+      throw new Error('MongoDB spark collection is not initialized. Did you forget to call connect()?');
+    }
+    return this.sparkCollection;
+  }
+
+  getMoviesCollection(): Collection<NoId<Movie>> {
+    if (!this.moviesCollection) {
+      throw new Error('MongoDB movies collection is not initialized. Did you forget to call connect()?');
+    }
+    return this.moviesCollection;
+  }
+
+  getTechieCollection(): Collection<NoId<Techie>> {
+    if (!this.techieCollection) {
+      throw new Error('MongoDB techie collection is not initialized. Did you forget to call connect()?');
+    }
+    return this.techieCollection;
+  }
+
+  getWeekendProjectCollection(): Collection<NoId<WeekendProject>> {
+    if (!this.weekendProjectCollection) {
+      throw new Error('MongoDB weekend project collection is not initialized. Did you forget to call connect()?');
+    }
+    return this.weekendProjectCollection;
   }
 }
 

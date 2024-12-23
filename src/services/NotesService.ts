@@ -1,7 +1,7 @@
 import { Collection, ObjectId } from 'mongodb';
 import type { NoId } from '../connections/mongo.ts';
 
-export type Note = {
+export type Note<ExtraFields = {}> = {
     id: string;
     title: string;
     content: string;
@@ -9,7 +9,8 @@ export type Note = {
     published: boolean;
     createdAt: string;
     updatedAt: string;
-}
+    tags?: string[];
+} & ExtraFields
 
 export class NotesService {
   constructor(
@@ -34,16 +35,17 @@ export class NotesService {
     return result ? { ...result, id: result._id.toString() } : null;
   }
 
-  async createNote(note: Omit<Note, 'id' | 'createdAt' | 'updatedAt' | 'published'>): Promise<Note> {
-    const newNote: NoId<Note> = {
+  async createNote<T extends Note>(note: Omit<T, 'id' | 'createdAt' | 'updatedAt' | 'published' | 'tags'>): Promise<T> {
+    const newNote = {
       ...note,
-      published: false, // Default to unpublished
+      tags: [],
+      published: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-    };
+    } as NoId<Note>;
 
     const result = await this.noteCollection.insertOne(newNote);
-    return { ...newNote, id: result.insertedId.toString() };
+    return { ...newNote, id: result.insertedId.toString() } as T;
   }
 
   async updateNote(id: string, update: Partial<Omit<Note, 'id' | 'createdAt' | 'updatedAt'>>): Promise<Note> {
@@ -85,6 +87,34 @@ export class NotesService {
       .find({ date: date })
       .sort({ createdAt: -1 })
       .toArray();
+    return results.map(result => ({ ...result, id: result._id.toString() }));
+  }
+
+  async addTag(id: string, tag: string): Promise<Note> {
+    const note = await this.getNoteById(id);
+    if (!note) throw new Error(`Note ${id} not found`);
+
+    const tags = [...(note.tags || [])];
+    if (!tags.includes(tag)) {
+        tags.push(tag);
+    }
+
+    return this.updateNote(id, { tags });
+  }
+
+  async removeTag(id: string, tag: string): Promise<Note> {
+    const note = await this.getNoteById(id);
+    if (!note) throw new Error(`Note ${id} not found`);
+
+    const tags = (note.tags || []).filter(t => t !== tag);
+    return this.updateNote(id, { tags });
+  }
+
+  async getNotesByTag(tag: string): Promise<Note[]> {
+    const results = await this.noteCollection
+        .find({ tags: tag })
+        .sort({ createdAt: -1 })
+        .toArray();
     return results.map(result => ({ ...result, id: result._id.toString() }));
   }
 }
