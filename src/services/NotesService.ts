@@ -12,6 +12,8 @@ export type Note<ExtraFields = {}> = {
     tags?: string[];
 } & ExtraFields
 
+export type NoteMetadata = Omit<Note, 'content'>;
+
 export class NotesService {
   constructor(
     private readonly noteCollection: Collection<NoId<Note>>
@@ -19,6 +21,11 @@ export class NotesService {
 
   async getAllNotes(): Promise<Note[]> {
     const results = await this.noteCollection.find().sort({ date: -1 }).toArray();
+    return results.map(result => ({ ...result, id: result._id.toString() }));
+  }
+
+  async getAllNotesMetadata(): Promise<NoteMetadata[]> {
+    const results = await this.noteCollection.find({}, { projection: { content: 0 } }).sort({ date: -1 }).toArray();
     return results.map(result => ({ ...result, id: result._id.toString() }));
   }
 

@@ -55,7 +55,7 @@ export class MongoDBService {
   async connect(): Promise<void> {
     try {
       await this.client.connect();
-      console.log('Connected to MongoDB');
+      // console.log('Connected to MongoDB');
       const database = this.client.db(this.db);
       this.planCollection = database.collection<NoId<Plan>>(PLAN_COLLECTION_NAME);
       this.todoCollection = database.collection<NoId<Todo>>(TODO_COLLECTION_NAME);

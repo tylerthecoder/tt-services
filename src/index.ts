@@ -6,7 +6,7 @@ export type { BuyListItem } from './services/BuyListService.ts';
 export type { Todo } from './services/TodoService.ts';
 export type { TalkNote } from './services/TalkNotesService.ts';
 export type { ReadingListItem } from './services/ReadingListService.ts';
-export type { Note } from './services/NotesService.ts';
+export type { NoteMetadata, Note } from './services/NotesService.ts';
 export type { Creation } from './services/CreationsService.ts';
 export type { Spark } from './services/SparksService.ts';
 export type { Techie } from './services/TechieService.ts';
