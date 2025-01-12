@@ -12,3 +12,4 @@ export type { Spark } from './services/SparksService.ts';
 export type { Techie } from './services/TechieService.ts';
 export type { Movie } from './services/MoviesService.ts';
 export type { WeekendProject } from './services/WeekendProjectService.ts';
+export type { GoogleNote } from './services/GoogleNoteService.ts';

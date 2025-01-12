@@ -9,6 +9,7 @@
         "typecheck": "tsc --noEmit"
     },
     "dependencies": {
+        "@googleapis/docs": "^3.3.0",
         "@trpc/client": "^11.0.0-rc.593",
         "@trpc/server": "^11.0.0-rc.593",
         "cors": "^2.8.5",

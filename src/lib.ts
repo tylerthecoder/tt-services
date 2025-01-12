@@ -10,6 +10,7 @@ import { SparksService } from "./services/SparksService.ts";
 import { MoviesService } from "./services/MoviesService.ts";
 import { TechieService } from "./services/TechieService.ts";
 import { WeekendProjectService } from "./services/WeekendProjectService.ts";
+import { GoogleNoteService } from "./services/GoogleNoteService.ts";
 
 export class TylersThings {
     constructor(
@@ -23,15 +24,13 @@ export class TylersThings {
         public readonly sparks: SparksService,
         public readonly movies: MoviesService,
         public readonly techies: TechieService,
-        public readonly weekendProjects: WeekendProjectService
+        public readonly weekendProjects: WeekendProjectService,
+        public readonly googleNotes: GoogleNoteService
     ) {}
 
     static async make(): Promise<TylersThings> {
-
         const db = await DatabaseSingleton.getInstance();
-
         const notes = new NotesService(db.getNoteCollection());
-
         const dailyPlans = new DailyPlansService(db.getPlanCollection());
         const todo = new TodoService(db.getTodoCollection());
         const buyList = new BuyListService(db.getBuyListCollection());
@@ -42,6 +41,7 @@ export class TylersThings {
         const movies = new MoviesService(db.getMoviesCollection());
         const techies = new TechieService(notes);
         const weekendProjects = new WeekendProjectService(db.getWeekendProjectCollection());
+        const googleNotes = new GoogleNoteService(notes);
 
         return new TylersThings(
             dailyPlans,
@@ -54,7 +54,8 @@ export class TylersThings {
             sparks,
             movies,
             techies,
-            weekendProjects
+            weekendProjects,
+            googleNotes
         );
     }
 }
