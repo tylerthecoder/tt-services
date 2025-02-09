@@ -4,13 +4,14 @@ import { BuyListService } from "./services/BuyListService.ts";
 import { TalkNotesService } from "./services/TalkNotesService.ts";
 import { ReadingListService } from "./services/ReadingListService.ts";
 import { NotesService } from "./services/NotesService.ts";
-import { DatabaseSingleton } from "./connections/mongo.ts";
+import { MongoDBService } from "./connections/mongo.ts";
 import { CreationsService } from "./services/CreationsService.ts";
 import { SparksService } from "./services/SparksService.ts";
 import { MoviesService } from "./services/MoviesService.ts";
 import { TechieService } from "./services/TechieService.ts";
 import { WeekendProjectService } from "./services/WeekendProjectService.ts";
 import { GoogleNoteService } from "./services/GoogleNoteService.ts";
+import { TimeTrackerService } from "./services/TimeTrackerService.ts";
 
 export class TylersThings {
     constructor(
@@ -25,11 +26,13 @@ export class TylersThings {
         public readonly movies: MoviesService,
         public readonly techies: TechieService,
         public readonly weekendProjects: WeekendProjectService,
-        public readonly googleNotes: GoogleNoteService
-    ) {}
+        public readonly googleNotes: GoogleNoteService,
+        public readonly timeTracker: TimeTrackerService
+    ) { }
 
-    static async make(): Promise<TylersThings> {
-        const db = await DatabaseSingleton.getInstance();
+    static async make(
+        db: MongoDBService
+    ): Promise<TylersThings> {
         const notes = new NotesService(db.getNoteCollection());
         const dailyPlans = new DailyPlansService(db.getPlanCollection());
         const todo = new TodoService(db.getTodoCollection());
@@ -42,6 +45,7 @@ export class TylersThings {
         const techies = new TechieService(notes);
         const weekendProjects = new WeekendProjectService(db.getWeekendProjectCollection());
         const googleNotes = new GoogleNoteService(notes);
+        const timeTracker = new TimeTrackerService(db.getTimeBlockCollection());
 
         return new TylersThings(
             dailyPlans,
@@ -55,7 +59,8 @@ export class TylersThings {
             movies,
             techies,
             weekendProjects,
-            googleNotes
+            googleNotes,
+            timeTracker
         );
     }
 }

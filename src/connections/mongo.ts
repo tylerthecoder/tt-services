@@ -1,4 +1,4 @@
-import { MongoClient, Collection } from 'mongodb';
+import { MongoClient, Collection, ServerApiVersion } from 'mongodb';
 import dotenv from 'dotenv';
 import { Note } from '../services/NotesService.ts';
 import { Plan } from '../services/DailyPlansService.ts';
@@ -11,6 +11,7 @@ import { Spark } from '../index.ts';
 import { Movie } from '../services/MoviesService.ts';
 import { Techie } from '../services/TechieService.ts';
 import { WeekendProject } from '../services/WeekendProjectService.ts';
+import { TimeBlock } from '../services/TimeTrackerService.ts';
 
 
 dotenv.config();
@@ -25,6 +26,7 @@ const TALK_NOTE_COLLECTION_NAME = 'talknotes';
 const READING_LIST_COLLECTION_NAME = 'readinglist';
 const NOTES_COLLECTION_NAME = 'notes';
 const PLAN_COLLECTION_NAME = 'plans';
+const TIME_BLOCK_COLLECTION_NAME = 'timeblocks';
 
 export class MongoDBService {
   private readonly client: MongoClient;
@@ -40,6 +42,7 @@ export class MongoDBService {
   private moviesCollection?: Collection<NoId<Movie>>;
   private techieCollection?: Collection<NoId<Techie>>;
   private weekendProjectCollection?: Collection<NoId<WeekendProject>>;
+  private timeBlockCollection?: Collection<NoId<TimeBlock>>;
 
   constructor() {
     const uri = process.env.DB_URI;
@@ -49,13 +52,22 @@ export class MongoDBService {
       throw new Error('MONGODB_URI is not defined in the environment variables');
     }
 
-    this.client = new MongoClient(uri);
+    console.log("URI", uri)
+
+    this.client = new MongoClient(uri, {
+      serverApi: {
+        version: ServerApiVersion.v1,
+        strict: true,
+        deprecationErrors: true,
+      }
+    });
   }
 
   async connect(): Promise<void> {
     try {
+      console.log("Connecting to Mongodb")
       await this.client.connect();
-      // console.log('Connected to MongoDB');
+      console.log('Connected to MongoDB');
       const database = this.client.db(this.db);
       this.planCollection = database.collection<NoId<Plan>>(PLAN_COLLECTION_NAME);
       this.todoCollection = database.collection<NoId<Todo>>(TODO_COLLECTION_NAME);
@@ -68,6 +80,7 @@ export class MongoDBService {
       this.moviesCollection = database.collection<NoId<Movie>>('movies');
       this.techieCollection = database.collection<NoId<Techie>>('techies');
       this.weekendProjectCollection = database.collection<NoId<WeekendProject>>('weekendprojects');
+      this.timeBlockCollection = database.collection<NoId<TimeBlock>>(TIME_BLOCK_COLLECTION_NAME);
     } catch (error) {
       console.error('Error connecting to MongoDB:', error);
       throw error;
@@ -155,6 +168,13 @@ export class MongoDBService {
     }
     return this.weekendProjectCollection;
   }
+
+  getTimeBlockCollection(): Collection<NoId<TimeBlock>> {
+    if (!this.timeBlockCollection) {
+      throw new Error('MongoDB time block collection is not initialized. Did you forget to call connect()?');
+    }
+    return this.timeBlockCollection;
+  }
 }
 
 export class DatabaseSingleton {
@@ -162,25 +182,34 @@ export class DatabaseSingleton {
 
   private static connectPromise: Promise<MongoDBService> | null = null;
 
-  private constructor() {}
+  private constructor() { }
 
   public static async getInstance(): Promise<MongoDBService> {
     if (DatabaseSingleton.instance) {
+      console.log('Returning existing instance');
       return DatabaseSingleton.instance;
     }
 
     let connectPromise = DatabaseSingleton.connectPromise;
 
     if (!connectPromise) {
+      console.log('Creating new instance');
       connectPromise = new Promise<MongoDBService>(async (resolve, reject) => {
         const instance = new MongoDBService();
-        await instance.connect();
-        resolve(instance);
+        try {
+          console.log('Connecting to MongoDB...');
+          await instance.connect();
+          console.log('Connected to MongoDB');
+          resolve(instance);
+        } catch (error) {
+          reject(error);
+        }
       });
       DatabaseSingleton.connectPromise = connectPromise;
     }
 
     const instance = await connectPromise;
+    console.log('Returning new instance');
     return instance;
   }
 }

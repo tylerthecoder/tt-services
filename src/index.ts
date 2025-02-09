@@ -13,3 +13,4 @@ export type { Techie } from './services/TechieService.ts';
 export type { Movie } from './services/MoviesService.ts';
 export type { WeekendProject } from './services/WeekendProjectService.ts';
 export type { GoogleNote } from './services/GoogleNoteService.ts';
+export type { TimeBlock } from './services/TimeTrackerService.ts';

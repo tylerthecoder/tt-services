@@ -2,11 +2,16 @@ import { Collection, ObjectId } from 'mongodb';
 import type { NoId } from '../connections/mongo.ts';
 
 export type Plan = {
-    id: string;
-    day: string;
-    createdAt: string;
-    updatedAt: string;
-    text: string;
+  id: string;
+  day: string;
+  createdAt: string;
+  updatedAt: string;
+  text: string;
+}
+
+export type DayWithNote = {
+  id: string;
+  day: string;
 }
 
 function getCurrentDayBoundary(): Date {
@@ -26,9 +31,10 @@ export class DailyPlansService {
 
   constructor(
     private readonly planCollection: Collection<NoId<Plan>>
-  ) {}
+  ) { }
 
   async getToday(): Promise<Plan | null> {
+    console.log('Getting today');
     const today = getCurrentDayBoundary();
     return this.getPlanByDay(today);
   }
@@ -80,11 +86,15 @@ export class DailyPlansService {
     return results.map(result => ({ ...result, id: result._id.toString() }));
   }
 
-  async getAllPastPlans(today: Date): Promise<Plan[]> {
+  async getDaysWithNotes(): Promise<DayWithNote[]> {
     const results = await this.planCollection
-      .find({ day: { $lt: today.toISOString() } })
+      .find({}, { projection: { day: 1 } })
       .sort({ day: -1 })
       .toArray();
-    return results.map(result => ({ ...result, id: result._id.toString() }));
+
+    return results.map(result => ({
+      id: result._id.toString(),
+      day: result.day
+    }));
   }
 }
