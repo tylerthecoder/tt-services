@@ -2,14 +2,15 @@ import { Collection, ObjectId } from 'mongodb';
 import type { NoId } from '../connections/mongo.ts';
 
 export type Note<ExtraFields = {}> = {
-    id: string;
-    title: string;
-    content: string;
-    date: string;
-    published: boolean;
-    createdAt: string;
-    updatedAt: string;
-    tags?: string[];
+  id: string;
+  title: string;
+  content: string;
+  date: string;
+  published: boolean;
+  createdAt: string;
+  updatedAt: string;
+  tags?: string[];
+  deleted?: boolean;
 } & ExtraFields
 
 export type NoteMetadata = Omit<Note, 'content'>;
@@ -17,7 +18,7 @@ export type NoteMetadata = Omit<Note, 'content'>;
 export class NotesService {
   constructor(
     private readonly noteCollection: Collection<NoId<Note>>
-  ) {}
+  ) { }
 
   async getAllNotes(): Promise<Note[]> {
     const results = await this.noteCollection.find().sort({ date: -1 }).toArray();
@@ -25,7 +26,10 @@ export class NotesService {
   }
 
   async getAllNotesMetadata(): Promise<NoteMetadata[]> {
-    const results = await this.noteCollection.find({}, { projection: { content: 0 } }).sort({ date: -1 }).toArray();
+    const results = await this.noteCollection
+      .find({ deleted: { $ne: true } }, { projection: { content: 0 } })
+      .sort({ date: -1 })
+      .toArray();
     return results.map(result => ({ ...result, id: result._id.toString() }));
   }
 
@@ -103,7 +107,7 @@ export class NotesService {
 
     const tags = [...(note.tags || [])];
     if (!tags.includes(tag)) {
-        tags.push(tag);
+      tags.push(tag);
     }
 
     return this.updateNote(id, { tags });
@@ -119,9 +123,22 @@ export class NotesService {
 
   async getNotesByTag(tag: string): Promise<Note[]> {
     const results = await this.noteCollection
-        .find({ tags: tag })
-        .sort({ createdAt: -1 })
-        .toArray();
+      .find({ tags: tag })
+      .sort({ createdAt: -1 })
+      .toArray();
     return results.map(result => ({ ...result, id: result._id.toString() }));
+  }
+
+  async softDeleteNote(id: string): Promise<boolean> {
+    const result = await this.noteCollection.updateOne(
+      { _id: new ObjectId(id) },
+      {
+        $set: {
+          deleted: true,
+          updatedAt: new Date().toISOString()
+        }
+      }
+    );
+    return result.modifiedCount === 1;
   }
 }

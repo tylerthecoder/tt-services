@@ -12,6 +12,7 @@ import { Movie } from '../services/MoviesService.ts';
 import { Techie } from '../services/TechieService.ts';
 import { WeekendProject } from '../services/WeekendProjectService.ts';
 import { TimeBlock } from '../services/TimeTrackerService.ts';
+import { Week } from '../services/WeeklyService.ts';
 
 
 dotenv.config();
@@ -43,6 +44,7 @@ export class MongoDBService {
   private techieCollection?: Collection<NoId<Techie>>;
   private weekendProjectCollection?: Collection<NoId<WeekendProject>>;
   private timeBlockCollection?: Collection<NoId<TimeBlock>>;
+  private weekCollection?: Collection<NoId<Week>>;
 
   constructor() {
     const uri = process.env.DB_URI;
@@ -81,6 +83,7 @@ export class MongoDBService {
       this.techieCollection = database.collection<NoId<Techie>>('techies');
       this.weekendProjectCollection = database.collection<NoId<WeekendProject>>('weekendprojects');
       this.timeBlockCollection = database.collection<NoId<TimeBlock>>(TIME_BLOCK_COLLECTION_NAME);
+      this.weekCollection = database.collection<NoId<Week>>('weeks');
     } catch (error) {
       console.error('Error connecting to MongoDB:', error);
       throw error;
@@ -174,6 +177,13 @@ export class MongoDBService {
       throw new Error('MongoDB time block collection is not initialized. Did you forget to call connect()?');
     }
     return this.timeBlockCollection;
+  }
+
+  getWeekCollection(): Collection<NoId<Week>> {
+    if (!this.weekCollection) {
+      throw new Error('MongoDB week collection is not initialized. Did you forget to call connect()?');
+    }
+    return this.weekCollection;
   }
 }
 

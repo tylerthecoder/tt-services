@@ -14,3 +14,7 @@ export type { Movie } from './services/MoviesService.ts';
 export type { WeekendProject } from './services/WeekendProjectService.ts';
 export type { GoogleNote } from './services/GoogleNoteService.ts';
 export type { TimeBlock } from './services/TimeTrackerService.ts';
+export type { Week, WeekTodo } from './services/WeeklyService.ts';
+
+// Re-export services
+export { WeeklyService } from './services/WeeklyService.ts';
