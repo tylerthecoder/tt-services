@@ -7,12 +7,13 @@ import { BuyListItem } from '../services/BuyListService.ts';
 import { TalkNote } from '../services/TalkNotesService.ts';
 import { ReadingListItem } from '../services/ReadingListService.ts';
 import { Creation } from '../services/CreationsService.ts';
-import { Spark } from '../index.ts';
 import { Movie } from '../services/MoviesService.ts';
 import { Techie } from '../services/TechieService.ts';
 import { WeekendProject } from '../services/WeekendProjectService.ts';
 import { TimeBlock } from '../services/TimeTrackerService.ts';
 import { Week } from '../services/WeeklyService.ts';
+import { List } from '../services/ListsService.ts';
+import { Spark } from '../services/SparksService.ts';
 
 
 dotenv.config();
@@ -45,6 +46,7 @@ export class MongoDBService {
   private weekendProjectCollection?: Collection<NoId<WeekendProject>>;
   private timeBlockCollection?: Collection<NoId<TimeBlock>>;
   private weekCollection?: Collection<NoId<Week>>;
+  private listCollection?: Collection<NoId<List>>;
 
   constructor() {
     const uri = process.env.DB_URI;
@@ -84,6 +86,7 @@ export class MongoDBService {
       this.weekendProjectCollection = database.collection<NoId<WeekendProject>>('weekendprojects');
       this.timeBlockCollection = database.collection<NoId<TimeBlock>>(TIME_BLOCK_COLLECTION_NAME);
       this.weekCollection = database.collection<NoId<Week>>('weeks');
+      this.listCollection = database.collection<NoId<List>>('lists');
     } catch (error) {
       console.error('Error connecting to MongoDB:', error);
       throw error;
@@ -184,6 +187,13 @@ export class MongoDBService {
       throw new Error('MongoDB week collection is not initialized. Did you forget to call connect()?');
     }
     return this.weekCollection;
+  }
+
+  getListCollection(): Collection<NoId<List>> {
+    if (!this.listCollection) {
+      throw new Error('MongoDB list collection is not initialized. Did you forget to call connect()?');
+    }
+    return this.listCollection;
   }
 }
 

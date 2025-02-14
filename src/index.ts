@@ -1,6 +1,4 @@
 export { TylersThings } from './lib.ts';
-
-// Re-export types
 export type { Plan } from './services/DailyPlansService.ts';
 export type { BuyListItem } from './services/BuyListService.ts';
 export type { Todo } from './services/TodoService.ts';
@@ -15,6 +13,6 @@ export type { WeekendProject } from './services/WeekendProjectService.ts';
 export type { GoogleNote } from './services/GoogleNoteService.ts';
 export type { TimeBlock } from './services/TimeTrackerService.ts';
 export type { Week, WeekTodo } from './services/WeeklyService.ts';
-
-// Re-export services
+export type { List, ListItem } from './services/ListsService.ts';
+export { ListsService } from './services/ListsService.ts';
 export { WeeklyService } from './services/WeeklyService.ts';
