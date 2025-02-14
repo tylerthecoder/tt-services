@@ -12,6 +12,7 @@ export type WeekTodo = {
 
 export type Week = {
     id: string;
+    weekName: string;
     startDate: string; // ISO string of the week's start (Monday)
     todos: WeekTodo[];
     noteId: string;
@@ -26,12 +27,16 @@ export class WeeklyService {
     ) { }
 
     private getWeekStart(date: Date = new Date()): Date {
-        const d = new Date(date);
-        const day = d.getDay();
-        const diff = d.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
-        d.setDate(diff);
-        d.setUTCHours(0, 0, 0, 0);
-        return d;
+        const current = new Date(date);
+        let day = current.getDay();
+        // Adjust so that Sunday (0) is treated as 7, ensuring Monday is the first day of the week
+        if (day === 0) {
+            day = 7;
+        }
+        // Subtract (day - 1) days to get back to Monday
+        current.setDate(current.getDate() - (day - 1));
+        current.setHours(0, 0, 0, 0);
+        return current;
     }
 
     private async createWeeklyNote(date: string): Promise<string> {
@@ -49,12 +54,18 @@ export class WeeklyService {
 
     async getCurrentWeek(): Promise<Week> {
         const weekStart = this.getWeekStart();
-        const weekStartStr = weekStart.toLocaleString('en-US', {
-            timeZone: 'UTC'
-        });
+        const weekStartStr = weekStart.toISOString();
+
+        // Format as YYYY-Www
+        const year = weekStart.getFullYear();
+        const weekNum = Math.ceil((((weekStart.getTime() - new Date(year, 0, 1).getTime()) / 86400000) + 1) / 7);
+
+        const weekName = `${year}-W${weekNum.toString().padStart(2, '0')}`;
+
+        console.log("Getting current week. Week name:", weekName);
 
         let currentWeek = await this.weekCollection.findOne({
-            startDate: weekStartStr
+            weekName
         });
 
         if (!currentWeek) {
@@ -78,6 +89,7 @@ export class WeeklyService {
                 : [];
 
             const newWeek: NoId<Week> = {
+                weekName,
                 startDate: weekStartStr,
                 todos,
                 noteId,
