@@ -49,7 +49,9 @@ export class WeeklyService {
 
     async getCurrentWeek(): Promise<Week> {
         const weekStart = this.getWeekStart();
-        const weekStartStr = weekStart.toISOString();
+        const weekStartStr = weekStart.toLocaleString('en-US', {
+            timeZone: 'UTC'
+        });
 
         let currentWeek = await this.weekCollection.findOne({
             startDate: weekStartStr
