@@ -16,3 +16,8 @@ export type { Week, WeekTodo } from './services/WeeklyService.ts';
 export type { List, ListItem } from './services/ListsService.ts';
 export { ListsService } from './services/ListsService.ts';
 export { WeeklyService } from './services/WeeklyService.ts';
+export { GoogleTokenService } from './services/GoogleTokenService.ts';
+export { GoogleService } from './connections/google.ts';
+export { DatabaseSingleton } from './connections/mongo.ts';
+export { GoogleNoteService } from './services/GoogleNoteService.ts';
+export { NotesService } from './services/NotesService.ts';

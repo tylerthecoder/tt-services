@@ -177,4 +177,21 @@ export class WeeklyService {
 
         return { ...result, id: result._id.toString() };
     }
+
+    async deleteTodo(weekId: string, todoId: string): Promise<Week> {
+        const result = await this.weekCollection.findOneAndUpdate(
+            { _id: new ObjectId(weekId) },
+            {
+                $pull: { todos: { id: todoId } },
+                $set: { updatedAt: new Date().toISOString() }
+            },
+            { returnDocument: 'after' }
+        );
+
+        if (!result) {
+            throw new Error(`Week with id ${weekId} or todo with id ${todoId} not found`);
+        }
+
+        return { ...result, id: result._id.toString() };
+    }
 }

@@ -1,24 +1,15 @@
-import { docs_v1 } from '@googleapis/docs';
 import { Note, NotesService } from './NotesService.js';
-import { GoogleAuth } from 'google-auth-library';
+import { GoogleService } from '../connections/google.js';
 
 export type GoogleNote = Note<{ googleDocId: string }>;
 
 export class GoogleNoteService {
     private static readonly GOOGLE_NOTE_TAG = 'google-doc';
-    private docs: docs_v1.Docs;
-    private auth: GoogleAuth;
 
-    constructor(private readonly notesService: NotesService) {
-        const keyPath = import.meta.dirname + '/../../google-keys.json';
-        console.log("Loading key from: ", keyPath);
-        this.auth = new GoogleAuth({
-            keyFile: keyPath,
-            scopes: ['https://www.googleapis.com/auth/cloud-platform', 'https://www.googleapis.com/auth/drive'],
-        });
-
-        this.docs = new docs_v1.Docs({ auth: this.auth });
-    }
+    constructor(
+        private readonly notesService: NotesService,
+        private readonly googleService: GoogleService
+    ) { }
 
     async getAllGoogleNotes(): Promise<GoogleNote[]> {
         const notes = await this.notesService.getNotesByTag(GoogleNoteService.GOOGLE_NOTE_TAG);
@@ -30,19 +21,18 @@ export class GoogleNoteService {
         return note && 'googleDocId' in note ? note as GoogleNote : null;
     }
 
-    async createGoogleNote(googleDocId: string): Promise<GoogleNote> {
+    async createGoogleNote(userId: string, googleDocId: string): Promise<GoogleNote> {
         try {
-            // Fetch the document to get its title
-            const doc = await this.docs.documents.get({
-                documentId: googleDocId,
-            });
+            // Fetch the document using GoogleService
+            const doc = await this.googleService.getUserDocs(userId)
+                .then(docs => docs.find(doc => doc.id === googleDocId));
 
-            if (!doc.data.title) {
-                throw new Error('Could not fetch Google Doc title');
+            if (!doc || !doc.name) {
+                throw new Error('Could not fetch Google Doc information');
             }
 
             const newNote = await this.notesService.createNote<GoogleNote>({
-                title: doc.data.title,
+                title: doc.name,
                 content: '',  // We don't store the content in our DB since it lives in Google Docs
                 date: new Date().toISOString(),
                 googleDocId,
@@ -67,17 +57,16 @@ export class GoogleNoteService {
 
     async getGoogleDocContent(googleDocId: string): Promise<string> {
         try {
-            const doc = await this.docs.documents.get({
-                documentId: googleDocId,
-            });
+            // Use GoogleService to fetch document content
+            const cookies = require('next/headers').cookies;
+            const cookieStore = cookies();
+            const userId = cookieStore.get('googleUserId')?.value;
 
-            // This is a simple implementation - you might want to add more sophisticated
-            // parsing of the Google Doc content structure
-            return doc.data.body?.content
-                ?.map(element => element.paragraph?.elements
-                    ?.map(el => el.textRun?.content || '')
-                    .join('') || '')
-                .join('\n') || '';
+            if (!userId) {
+                throw new Error('User not authenticated with Google');
+            }
+
+            return await this.googleService.getDocContent(userId, googleDocId);
         } catch (error: unknown) {
             const errorMessage = error instanceof Error ? error.message : 'Unknown error';
             throw new Error(`Failed to fetch Google Doc content: ${errorMessage}`);

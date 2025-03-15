@@ -141,4 +141,11 @@ export class NotesService {
     );
     return result.modifiedCount === 1;
   }
+
+  async getAllTags(): Promise<string[]> {
+    // Get all unique tags from non-deleted notes
+    const tags = await this.noteCollection.distinct('tags', { deleted: { $ne: true } });
+    // Filter out any null or undefined values and sort alphabetically
+    return tags.filter(tag => tag !== undefined).sort();
+  }
 }
