@@ -3,11 +3,13 @@ import { GoogleAuth } from 'google-auth-library';
 import { google } from 'googleapis';
 import { OAuth2Client } from 'google-auth-library';
 import { DatabaseSingleton, GoogleToken, NoId } from './mongo.ts';
-import GOOGLE_CREDS from "../../creds/client_secret_91217810905-6b657b9jaf0gsuvsng4c5gscdlncsu3v.apps.googleusercontent.com.json" assert { type: "json" };
 
 const log = (...args: any[]) => {
     console.log("GoogleService: ", ...args);
 }
+
+const GOOGLE_CREDS = JSON.parse(process.env.GOOGLE_CREDS || '{}');
+console.log('GOOGLE_CREDS', GOOGLE_CREDS);
 
 const CLIENT_SECRET = GOOGLE_CREDS.web;
 const SCOPES = [
