@@ -20,6 +20,17 @@ dotenv.config();
 
 export type NoId<T> = Omit<T, 'id'>;
 
+// Add new GoogleToken type
+export interface GoogleToken {
+  id: string;
+  userId: string;
+  accessToken: string;
+  refreshToken: string;
+  expiryDate: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 const DB_NAME = 'tylernote';
 
 const TODO_COLLECTION_NAME = 'todos';
@@ -29,6 +40,7 @@ const READING_LIST_COLLECTION_NAME = 'readinglist';
 const NOTES_COLLECTION_NAME = 'notes';
 const PLAN_COLLECTION_NAME = 'plans';
 const TIME_BLOCK_COLLECTION_NAME = 'timeblocks';
+const GOOGLE_TOKEN_COLLECTION_NAME = 'googletokens';
 
 export class MongoDBService {
   private readonly client: MongoClient;
@@ -47,6 +59,7 @@ export class MongoDBService {
   private timeBlockCollection?: Collection<NoId<TimeBlock>>;
   private weekCollection?: Collection<NoId<Week>>;
   private listCollection?: Collection<NoId<List>>;
+  private googleTokenCollection?: Collection<NoId<GoogleToken>>; // Add new collection
 
   constructor() {
     const uri = process.env.DB_URI;
@@ -61,7 +74,7 @@ export class MongoDBService {
     this.client = new MongoClient(uri, {
       serverApi: {
         version: ServerApiVersion.v1,
-        strict: true,
+        // strict: true,
         deprecationErrors: true,
       }
     });
@@ -87,6 +100,7 @@ export class MongoDBService {
       this.timeBlockCollection = database.collection<NoId<TimeBlock>>(TIME_BLOCK_COLLECTION_NAME);
       this.weekCollection = database.collection<NoId<Week>>('weeks');
       this.listCollection = database.collection<NoId<List>>('lists');
+      this.googleTokenCollection = database.collection<NoId<GoogleToken>>(GOOGLE_TOKEN_COLLECTION_NAME); // Initialize new collection
     } catch (error) {
       console.error('Error connecting to MongoDB:', error);
       throw error;
@@ -194,6 +208,14 @@ export class MongoDBService {
       throw new Error('MongoDB list collection is not initialized. Did you forget to call connect()?');
     }
     return this.listCollection;
+  }
+
+  // Add getter for Google token collection
+  getGoogleTokenCollection(): Collection<NoId<GoogleToken>> {
+    if (!this.googleTokenCollection) {
+      throw new Error('MongoDB Google token collection is not initialized. Did you forget to call connect()?');
+    }
+    return this.googleTokenCollection;
   }
 }
 
