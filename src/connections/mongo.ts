@@ -69,8 +69,6 @@ export class MongoDBService {
       throw new Error('MONGODB_URI is not defined in the environment variables');
     }
 
-    console.log("URI", uri)
-
     this.client = new MongoClient(uri, {
       serverApi: {
         version: ServerApiVersion.v1,

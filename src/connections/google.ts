@@ -9,7 +9,6 @@ const log = (...args: any[]) => {
 }
 
 const GOOGLE_CREDS = JSON.parse(process.env.GOOGLE_CREDS || '{}');
-console.log('GOOGLE_CREDS', GOOGLE_CREDS);
 
 const CLIENT_SECRET = GOOGLE_CREDS.web;
 const SCOPES = [

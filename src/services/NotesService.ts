@@ -21,7 +21,7 @@ export class NotesService {
   ) { }
 
   async getAllNotes(): Promise<Note[]> {
-    const results = await this.noteCollection.find().sort({ date: -1 }).toArray();
+    const results = await this.noteCollection.find({ deleted: { $ne: true } }).sort({ date: -1 }).toArray();
     return results.map(result => ({ ...result, id: result._id.toString() }));
   }
 
