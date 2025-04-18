@@ -1,13 +1,4 @@
 {
-    "name": "tt-services",
-    "type": "module",
-    "main": "src/index.ts",
-    "version": "1.0.0",
-    "scripts": {
-        "start": "bun run server.ts",
-        "dev": "bun --watch server.ts",
-        "typecheck": "tsc --noEmit"
-    },
     "dependencies": {
         "@googleapis/docs": "^3.3.0",
         "@trpc/client": "^11.0.0-rc.593",
@@ -25,5 +16,14 @@
         "typescript": "^5.6.3",
         "vite": "^5.4.10",
         "wait-port": "^1.1.0"
-    }
+    },
+    "main": "src/index.ts",
+    "name": "tt-services",
+    "scripts": {
+        "dev": "bun --watch server.ts",
+        "start": "bun run server.ts",
+        "typecheck": "tsc --noEmit"
+    },
+    "type": "module",
+    "version": "1.0.1"
 }
