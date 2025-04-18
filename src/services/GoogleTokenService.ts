@@ -1,12 +1,17 @@
-import { DatabaseSingleton, GoogleToken, NoId } from '../connections/mongo.ts';
+import { DatabaseSingleton, GoogleToken, MongoDBService, NoId } from '../connections/mongo.ts';
 
 export class GoogleTokenService {
+    private readonly db: MongoDBService;
+
+    constructor(db: MongoDBService) {
+        this.db = db;
+    }
+
     /**
      * Store a Google token for a user
      */
     async storeToken(userId: string, accessToken: string, refreshToken: string, expiryDate: number): Promise<GoogleToken> {
-        const db = await DatabaseSingleton.getInstance();
-        const tokenCollection = db.getGoogleTokenCollection();
+        const tokenCollection = this.db.getGoogleTokenCollection();
 
         // Check if token already exists for this user
         const existingToken = await tokenCollection.findOne({ userId });
@@ -58,8 +63,7 @@ export class GoogleTokenService {
      * Get stored token for a user
      */
     async getToken(userId: string): Promise<GoogleToken | null> {
-        const db = await DatabaseSingleton.getInstance();
-        const tokenCollection = db.getGoogleTokenCollection();
+        const tokenCollection = this.db.getGoogleTokenCollection();
 
         const token = await tokenCollection.findOne({ userId });
 
@@ -82,8 +86,7 @@ export class GoogleTokenService {
      * Update the access token and expiry date
      */
     async updateAccessToken(userId: string, accessToken: string, expiryDate: number): Promise<GoogleToken | null> {
-        const db = await DatabaseSingleton.getInstance();
-        const tokenCollection = db.getGoogleTokenCollection();
+        const tokenCollection = this.db.getGoogleTokenCollection();
 
         // First check if the token exists
         const existingToken = await tokenCollection.findOne({ userId });
@@ -124,8 +127,7 @@ export class GoogleTokenService {
      * Delete a token
      */
     async deleteToken(userId: string): Promise<boolean> {
-        const db = await DatabaseSingleton.getInstance();
-        const tokenCollection = db.getGoogleTokenCollection();
+        const tokenCollection = this.db.getGoogleTokenCollection();
 
         const result = await tokenCollection.deleteOne({ userId });
 

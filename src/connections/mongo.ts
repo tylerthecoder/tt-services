@@ -14,6 +14,7 @@ import { TimeBlock } from '../services/TimeTrackerService.ts';
 import { Week } from '../services/WeeklyService.ts';
 import { List } from '../services/ListsService.ts';
 import { Spark } from '../services/SparksService.ts';
+import { Jot } from '../services/JotsService.ts';
 
 
 dotenv.config();
@@ -41,6 +42,7 @@ const NOTES_COLLECTION_NAME = 'notes';
 const PLAN_COLLECTION_NAME = 'plans';
 const TIME_BLOCK_COLLECTION_NAME = 'timeblocks';
 const GOOGLE_TOKEN_COLLECTION_NAME = 'googletokens';
+const JOTS_COLLECTION_NAME = 'jots';
 
 export class MongoDBService {
   private readonly client: MongoClient;
@@ -59,7 +61,8 @@ export class MongoDBService {
   private timeBlockCollection?: Collection<NoId<TimeBlock>>;
   private weekCollection?: Collection<NoId<Week>>;
   private listCollection?: Collection<NoId<List>>;
-  private googleTokenCollection?: Collection<NoId<GoogleToken>>; // Add new collection
+  private googleTokenCollection?: Collection<NoId<GoogleToken>>;
+  private jotsCollection?: Collection<NoId<Jot>>;
 
   constructor() {
     const uri = process.env.DB_URI;
@@ -98,7 +101,8 @@ export class MongoDBService {
       this.timeBlockCollection = database.collection<NoId<TimeBlock>>(TIME_BLOCK_COLLECTION_NAME);
       this.weekCollection = database.collection<NoId<Week>>('weeks');
       this.listCollection = database.collection<NoId<List>>('lists');
-      this.googleTokenCollection = database.collection<NoId<GoogleToken>>(GOOGLE_TOKEN_COLLECTION_NAME); // Initialize new collection
+      this.googleTokenCollection = database.collection<NoId<GoogleToken>>(GOOGLE_TOKEN_COLLECTION_NAME);
+      this.jotsCollection = database.collection<NoId<Jot>>(JOTS_COLLECTION_NAME);
     } catch (error) {
       console.error('Error connecting to MongoDB:', error);
       throw error;
@@ -215,6 +219,14 @@ export class MongoDBService {
     }
     return this.googleTokenCollection;
   }
+
+  // Add getter for Jots collection
+  getJotsCollection(): Collection<NoId<Jot>> {
+    if (!this.jotsCollection) {
+      throw new Error('MongoDB Jots collection is not initialized. Did you forget to call connect()?');
+    }
+    return this.jotsCollection;
+  }
 }
 
 export class DatabaseSingleton {
@@ -237,9 +249,7 @@ export class DatabaseSingleton {
       connectPromise = new Promise<MongoDBService>(async (resolve, reject) => {
         const instance = new MongoDBService();
         try {
-          console.log('Connecting to MongoDB...');
           await instance.connect();
-          console.log('Connected to MongoDB');
           resolve(instance);
         } catch (error) {
           reject(error);

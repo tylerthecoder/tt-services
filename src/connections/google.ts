@@ -2,7 +2,7 @@ import { docs_v1 } from '@googleapis/docs';
 import { GoogleAuth } from 'google-auth-library';
 import { google } from 'googleapis';
 import { OAuth2Client } from 'google-auth-library';
-import { DatabaseSingleton, GoogleToken, NoId } from './mongo.ts';
+import { DatabaseSingleton, GoogleToken, MongoDBService, NoId } from './mongo.ts';
 
 const log = (...args: any[]) => {
     console.log("GoogleService: ", ...args);
@@ -21,7 +21,9 @@ const SCOPES = [
 export class GoogleService {
     private oauth2Client: OAuth2Client;
 
-    constructor() {
+    constructor(
+        private readonly db: MongoDBService
+    ) {
         this.oauth2Client = new OAuth2Client(
             CLIENT_SECRET.client_id,
             CLIENT_SECRET.client_secret,
@@ -69,8 +71,7 @@ export class GoogleService {
             };
 
             // Save to database
-            const db = await DatabaseSingleton.getInstance();
-            const tokenCollection = db.getGoogleTokenCollection();
+            const tokenCollection = this.db.getGoogleTokenCollection();
 
             // Check if we already have a token for this user
             const existingToken = await tokenCollection.findOne({ userId });
@@ -123,6 +124,7 @@ export class GoogleService {
             if (Date.now() >= token.expiryDate) {
                 log('Token expired, refreshing...');
                 const { credentials } = await this.oauth2Client.refreshAccessToken();
+                log('New token: ');
 
                 // Update token in DB
                 await tokenCollection.updateOne(

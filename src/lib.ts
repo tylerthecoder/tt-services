@@ -15,6 +15,7 @@ import { TimeTrackerService } from "./services/TimeTrackerService.ts";
 import { WeeklyService } from "./services/WeeklyService.ts";
 import { ListsService } from './services/ListsService.ts';
 import { GoogleService } from './connections/google.ts';
+import { JotsService } from './services/JotsService.ts';
 
 export class TylersThings {
     constructor(
@@ -33,7 +34,8 @@ export class TylersThings {
         public readonly timeTracker: TimeTrackerService,
         public readonly weekly: WeeklyService,
         public readonly lists: ListsService,
-        public readonly google: GoogleService
+        public readonly google: GoogleService,
+        public readonly jots: JotsService
     ) { }
 
     static async make(
@@ -49,12 +51,13 @@ export class TylersThings {
         const sparks = new SparksService(db.getSparkCollection());
         const movies = new MoviesService(db.getMoviesCollection());
         const techies = new TechieService(notes);
-        const google = new GoogleService();
+        const google = new GoogleService(db);
         const weekendProjects = new WeekendProjectService(db.getWeekendProjectCollection());
         const googleNotes = new GoogleNoteService(notes, google);
         const timeTracker = new TimeTrackerService(db.getTimeBlockCollection());
         const weekly = new WeeklyService(db.getWeekCollection(), notes);
         const lists = new ListsService(db.getListCollection());
+        const jots = new JotsService(db.getJotsCollection());
 
         return new TylersThings(
             dailyPlans,
@@ -72,7 +75,8 @@ export class TylersThings {
             timeTracker,
             weekly,
             lists,
-            google
+            google,
+            jots
         );
     }
 }

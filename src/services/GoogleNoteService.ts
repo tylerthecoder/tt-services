@@ -21,6 +21,20 @@ export class GoogleNoteService {
         return note && 'googleDocId' in note ? note as GoogleNote : null;
     }
 
+    async saveContentFromGoogleDoc(id: string, userId: string): Promise<void> {
+        const note = await this.getGoogleNoteById(id);
+
+        if (!note) {
+            throw new Error('Google Note not found');
+        }
+
+        const content = await this.googleService.getDocContent(userId, note.googleDocId);
+
+        console.log('Content: ', content);
+
+        await this.notesService.updateNote(id, { content });
+    }
+
     async createGoogleNote(userId: string, googleDocId: string): Promise<GoogleNote> {
         try {
             // Fetch the document using GoogleService
@@ -53,23 +67,5 @@ export class GoogleNoteService {
 
     async deleteGoogleNote(id: string): Promise<boolean> {
         return this.notesService.deleteNote(id);
-    }
-
-    async getGoogleDocContent(googleDocId: string): Promise<string> {
-        try {
-            // Use GoogleService to fetch document content
-            const cookies = require('next/headers').cookies;
-            const cookieStore = cookies();
-            const userId = cookieStore.get('googleUserId')?.value;
-
-            if (!userId) {
-                throw new Error('User not authenticated with Google');
-            }
-
-            return await this.googleService.getDocContent(userId, googleDocId);
-        } catch (error: unknown) {
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-            throw new Error(`Failed to fetch Google Doc content: ${errorMessage}`);
-        }
     }
 }
