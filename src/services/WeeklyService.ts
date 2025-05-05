@@ -47,7 +47,6 @@ export class WeeklyService {
         });
 
         await this.notesService.addTag(note.id, 'weekly-note');
-        await this.notesService.addTag(note.id, date);
 
         return note.id;
     }

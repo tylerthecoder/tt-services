@@ -30,8 +30,6 @@ export class GoogleNoteService {
 
         const content = await this.googleService.getDocContent(userId, note.googleDocId);
 
-        console.log('Content: ', content);
-
         await this.notesService.updateNote(id, { content });
     }
 
