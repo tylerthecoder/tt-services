@@ -7,10 +7,6 @@ import { DatabaseSingleton, GoogleToken, MongoDBService, NoId } from './mongo.ts
 const log = (...args: any[]) => {
     console.log("GoogleService: ", ...args);
 }
-
-const GOOGLE_CREDS = JSON.parse(process.env.GOOGLE_CREDS || '{}');
-
-const CLIENT_SECRET = GOOGLE_CREDS.web;
 const SCOPES = [
     'https://www.googleapis.com/auth/drive.readonly',
     'https://www.googleapis.com/auth/documents.readonly',
@@ -24,6 +20,14 @@ export class GoogleService {
     constructor(
         private readonly db: MongoDBService
     ) {
+        const GOOGLE_CREDS = JSON.parse(process.env.GOOGLE_CREDS || '{}');
+
+        const CLIENT_SECRET = GOOGLE_CREDS.web;
+
+        if (!CLIENT_SECRET) {
+            throw new Error("CLIENT_SECRET not defined. Missing GOOGLE_CREDS in environment variables.");
+        }
+
         this.oauth2Client = new OAuth2Client(
             CLIENT_SECRET.client_id,
             CLIENT_SECRET.client_secret,

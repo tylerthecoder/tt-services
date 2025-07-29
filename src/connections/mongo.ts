@@ -83,7 +83,7 @@ export class MongoDBService {
 
   async connect(): Promise<void> {
     try {
-      console.log("Connecting to Mongodb")
+      console.log("Connecting to Mongodb...")
       await this.client.connect();
       console.log('Connected to MongoDB');
       const database = this.client.db(this.db);

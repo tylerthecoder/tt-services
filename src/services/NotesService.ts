@@ -1,4 +1,4 @@
-import { Collection, ObjectId } from 'mongodb';
+import { Collection, ObjectId, WithId } from 'mongodb';
 import type { NoId } from '../connections/mongo.ts';
 
 export type Note<ExtraFields = {}> = {
@@ -15,6 +15,15 @@ export type Note<ExtraFields = {}> = {
 
 export type NoteMetadata = Omit<Note, 'content'>;
 
+const convertNote = (note: WithId<NoId<Note>>): Note => {
+  const new_note = {
+    ...note,
+    id: note._id.toString(),
+  } as Note & { _id?: ObjectId };
+  delete new_note._id;
+  return new_note;
+}
+
 export class NotesService {
   constructor(
     private readonly noteCollection: Collection<NoId<Note>>
@@ -22,7 +31,7 @@ export class NotesService {
 
   async getAllNotes(): Promise<Note[]> {
     const results = await this.noteCollection.find({ deleted: { $ne: true } }).sort({ date: -1 }).toArray();
-    return results.map(result => ({ ...result, id: result._id.toString() }));
+    return results.map(result => convertNote(result));
   }
 
   async getAllNotesMetadata(): Promise<NoteMetadata[]> {
@@ -30,7 +39,7 @@ export class NotesService {
       .find({ deleted: { $ne: true } }, { projection: { content: 0 } })
       .sort({ date: -1 })
       .toArray();
-    return results.map(result => ({ ...result, id: result._id.toString() }));
+    return results.map(result => convertNote(result));
   }
 
   async getPublishedNotes(): Promise<Note[]> {
@@ -38,12 +47,13 @@ export class NotesService {
       .find({ published: true })
       .sort({ date: -1 })
       .toArray();
-    return results.map(result => ({ ...result, id: result._id.toString() }));
+    return results.map(result => convertNote(result));
   }
 
   async getNoteById(id: string): Promise<Note | null> {
+    console.log("getNoteById: id", id);
     const result = await this.noteCollection.findOne({ _id: new ObjectId(id) });
-    return result ? { ...result, id: result._id.toString() } : null;
+    return result ? convertNote(result) : null;
   }
 
   async createNote<T extends Note>(note: Omit<T, 'id' | 'createdAt' | 'updatedAt' | 'published' | 'tags'>): Promise<T> {
