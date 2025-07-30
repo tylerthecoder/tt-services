@@ -1,4 +1,4 @@
-import { docs_v1 } from '@googleapis/docs';
+import { docs_v1 } from 'googleapis';
 import { GoogleAuth } from 'google-auth-library';
 import { google } from 'googleapis';
 import { OAuth2Client } from 'google-auth-library';
@@ -170,6 +170,36 @@ export class GoogleService {
             log('Error getting user docs:', error);
             throw error;
         }
+    }
+
+    public async getGoogleDoc(userId: string, documentId: string): Promise<any> {
+        try {
+            const auth = await this.getAuthorizedClient(userId);
+            const docs = google.docs({ version: 'v1', auth });
+
+            const response = await docs.documents.get({
+                documentId
+            });
+
+            return response.data;
+        } catch (error) {
+            log('Error getting Google Doc:', error);
+            throw error;
+        }
+    }
+
+    public async createGoogleDoc(userId: string, title: string): Promise<string> {
+        const auth = await this.getAuthorizedClient(userId);
+        const drive = google.drive({ version: 'v3', auth });
+
+        const response = await drive.files.create({
+            requestBody: {
+                name: title,
+                mimeType: 'application/vnd.google-apps.document'
+            }
+        });
+
+        return response.data.id || '';
     }
 
     /**

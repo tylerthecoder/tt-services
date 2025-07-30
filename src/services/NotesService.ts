@@ -1,17 +1,6 @@
 import { Collection, ObjectId, WithId } from 'mongodb';
 import type { NoId } from '../connections/mongo.ts';
-
-export type Note<ExtraFields = {}> = {
-  id: string;
-  title: string;
-  content: string;
-  date: string;
-  published: boolean;
-  createdAt: string;
-  updatedAt: string;
-  tags?: string[];
-  deleted?: boolean;
-} & ExtraFields
+import { Note } from './notes.ts';
 
 export type NoteMetadata = Omit<Note, 'content'>;
 
@@ -51,7 +40,6 @@ export class NotesService {
   }
 
   async getNoteById(id: string): Promise<Note | null> {
-    console.log("getNoteById: id", id);
     const result = await this.noteCollection.findOne({ _id: new ObjectId(id) });
     return result ? convertNote(result) : null;
   }
@@ -69,7 +57,7 @@ export class NotesService {
     return { ...newNote, id: result.insertedId.toString() } as T;
   }
 
-  async updateNote(id: string, update: Partial<Omit<Note, 'id' | 'createdAt' | 'updatedAt'>>): Promise<Note> {
+  async updateNote<T extends Note>(id: string, update: Partial<Omit<T, 'id' | 'createdAt' | 'updatedAt'>>): Promise<T> {
     const updateDoc = {
       $set: {
         ...update,
@@ -87,7 +75,7 @@ export class NotesService {
       throw new Error(`Note with id ${id} not found`);
     }
 
-    return { ...result, id: result._id.toString() };
+    return { ...result, id: result._id.toString() } as unknown as T;
   }
 
   async publishNote(id: string): Promise<Note> {

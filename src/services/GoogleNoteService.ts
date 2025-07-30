@@ -1,18 +1,23 @@
-import { Note, NotesService } from './NotesService.js';
+import { NotesService } from './NotesService.js';
 import { GoogleService } from '../connections/google.js';
-
-export type GoogleNote = Note<{ googleDocId: string }>;
+import { Note, GoogleNote, GOOGLE_NOTE_TAG } from './notes.ts';
+import { GoogleDocConverter } from './GoogleDocConverter.ts';
 
 export class GoogleNoteService {
-    private static readonly GOOGLE_NOTE_TAG = 'google-doc';
-
     constructor(
         private readonly notesService: NotesService,
         private readonly googleService: GoogleService
     ) { }
 
+    static isGoogleNote(note: Note): note is GoogleNote {
+        const hasGoogleTag = note.tags?.includes(GOOGLE_NOTE_TAG) ?? false;
+        const hasGoogleDocId = 'googleDocId' in note;
+
+        return hasGoogleTag && hasGoogleDocId && note.content === '';
+    }
+
     async getAllGoogleNotes(): Promise<GoogleNote[]> {
-        const notes = await this.notesService.getNotesByTag(GoogleNoteService.GOOGLE_NOTE_TAG);
+        const notes = await this.notesService.getNotesByTag(GOOGLE_NOTE_TAG);
         return notes.filter((note: Note): note is GoogleNote => 'googleDocId' in note);
     }
 
@@ -28,29 +33,39 @@ export class GoogleNoteService {
             throw new Error('Google Note not found');
         }
 
-        const content = await this.googleService.getDocContent(userId, note.googleDocId);
+        // Get the raw Google Doc document
+        const googleDoc = await this.googleService.getGoogleDoc(userId, note.googleDocId);
 
-        await this.notesService.updateNote(id, { content });
+        // Convert to markdown
+        const markdownContent = GoogleDocConverter.convertToMarkdown(googleDoc);
+
+        await this.notesService.updateNote(id, { content: markdownContent });
     }
 
-    async createGoogleNote(userId: string, googleDocId: string): Promise<GoogleNote> {
+    async createGoogleNoteForNote(note: Note, userId: string): Promise<GoogleNote> {
+        const googleDocId = await this.googleService.createGoogleDoc(userId, note.title);
+        return this.assignGoogleDocIdToNote(note, googleDocId);
+    }
+
+    async assignGoogleDocIdToNote(note: Note, googleDocId: string): Promise<GoogleNote> {
+        const newTags = [...(note.tags || []), GOOGLE_NOTE_TAG];
+        await this.notesService.updateNote<GoogleNote>(note.id, { googleDocId, tags: newTags });
+        return note as GoogleNote;
+    }
+
+    async createGoogleNoteFromGoogleDocId(userId: string, googleDocId: string): Promise<GoogleNote> {
         try {
             // Fetch the document using GoogleService
-            const doc = await this.googleService.getUserDocs(userId)
-                .then(docs => docs.find(doc => doc.id === googleDocId));
-
-            if (!doc || !doc.name) {
-                throw new Error('Could not fetch Google Doc information');
-            }
+            const doc = await this.googleService.getGoogleDoc(userId, googleDocId);
 
             const newNote = await this.notesService.createNote<GoogleNote>({
-                title: doc.name,
+                title: doc.name || '',
                 content: '',  // We don't store the content in our DB since it lives in Google Docs
                 date: new Date().toISOString(),
                 googleDocId,
             });
 
-            await this.notesService.addTag(newNote.id, GoogleNoteService.GOOGLE_NOTE_TAG);
+            await this.notesService.addTag(newNote.id, GOOGLE_NOTE_TAG);
             return newNote;
         } catch (error: unknown) {
             const errorMessage = error instanceof Error ? error.message : 'Unknown error';
