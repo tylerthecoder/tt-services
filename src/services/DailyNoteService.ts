@@ -1,4 +1,5 @@
-import { Note, NotesService, NoteMetadata } from './NotesService.js';
+import { NoteMetadata, NotesService } from './NotesService.ts';
+import { Note } from './notes.ts';
 
 export type DailyNote = Note<{ day: string }>;
 

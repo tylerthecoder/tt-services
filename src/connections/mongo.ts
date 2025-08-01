@@ -1,6 +1,6 @@
 import { MongoClient, Collection, ServerApiVersion } from 'mongodb';
 import dotenv from 'dotenv';
-import { Note } from '../services/NotesService.ts';
+import { Note } from '../services/notes.ts';
 import { Plan } from '../services/DailyPlansService.ts';
 import { Todo } from '../services/TodoService.ts';
 import { BuyListItem } from '../services/BuyListService.ts';
