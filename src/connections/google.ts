@@ -37,10 +37,11 @@ export class GoogleService {
     /**
      * Generate the authorization URL for OAuth2 login
      */
-    public getAuthUrl(): string {
+    public getAuthUrl(redirectUri?: string): string {
         return this.oauth2Client.generateAuthUrl({
             access_type: 'offline',
             scope: SCOPES,
+            redirect_uri: redirectUri || `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/google/callback`,
             prompt: 'consent', // Always ask for consent to ensure we get a refresh token
         });
     }
