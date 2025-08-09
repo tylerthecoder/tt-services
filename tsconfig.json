@@ -16,7 +16,7 @@
     "noFallthroughCasesInSwitch": true,
     "allowJs": true,
     "checkJs": true,
-    "allowImportingTsExtensions": true,
+    "allowImportingTsExtensions": true
   },
   "include": ["./**/*.ts", "./**/*.js"],
   "exclude": ["node_modules", "dist"]

@@ -1,0 +1,33 @@
+{
+    "body": {
+        "content": [
+            {
+                "paragraph": {
+                    "elements": [
+                        {
+                            "textRun": {
+                                "content": "My Title"
+                            }
+                        }
+                    ],
+                    "paragraphStyle": {
+                        "namedStyleType": "TITLE"
+                    }
+                }
+            },
+            {
+                "paragraph": {
+                    "elements": [
+                        {
+                            "textRun": {
+                                "content": "Hello world"
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    },
+    "inlineObjects": {},
+    "lists": {}
+}

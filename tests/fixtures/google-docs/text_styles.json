@@ -1,0 +1,54 @@
+{
+    "body": {
+        "content": [
+            {
+                "paragraph": {
+                    "elements": [
+                        {
+                            "textRun": {
+                                "content": "Hello "
+                            }
+                        },
+                        {
+                            "textRun": {
+                                "content": "bold",
+                                "textStyle": {
+                                    "bold": true
+                                }
+                            }
+                        },
+                        {
+                            "textRun": {
+                                "content": " and "
+                            }
+                        },
+                        {
+                            "textRun": {
+                                "content": "italic",
+                                "textStyle": {
+                                    "italic": true
+                                }
+                            }
+                        },
+                        {
+                            "textRun": {
+                                "content": " and "
+                            }
+                        },
+                        {
+                            "textRun": {
+                                "content": "both",
+                                "textStyle": {
+                                    "bold": true,
+                                    "italic": true
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    },
+    "lists": {},
+    "inlineObjects": {}
+}

@@ -1,5 +1,3 @@
-import { docs_v1 } from 'googleapis';
-import { GoogleAuth } from 'google-auth-library';
 import { google } from 'googleapis';
 import { OAuth2Client } from 'google-auth-library';
 import { DatabaseSingleton, GoogleToken, MongoDBService, NoId } from './mongo.ts';

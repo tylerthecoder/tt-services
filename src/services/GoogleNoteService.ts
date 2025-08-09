@@ -42,6 +42,23 @@ export class GoogleNoteService {
         await this.notesService.updateNote(id, { content: markdownContent });
     }
 
+    /**
+     * Fetch Google Doc content and store it in the note's googleDocContent field for merge staging.
+     */
+    async stageContentFromGoogleDoc(id: string, userId: string): Promise<GoogleNote> {
+        const note = await this.getGoogleNoteById(id);
+
+        if (!note) {
+            throw new Error('Google Note not found');
+        }
+
+        const googleDoc = await this.googleService.getGoogleDoc(userId, note.googleDocId);
+        const markdownContent = GoogleDocConverter.convertToMarkdown(googleDoc);
+
+        const updated = await this.notesService.updateNote<GoogleNote>(id, { googleDocContent: markdownContent });
+        return updated as GoogleNote;
+    }
+
     async createGoogleNoteForNote(note: Note, userId: string): Promise<GoogleNote> {
         const googleDocId = await this.googleService.createGoogleDoc(userId, note.title);
         return this.assignGoogleDocIdToNote(note, googleDocId);
@@ -63,6 +80,7 @@ export class GoogleNoteService {
                 content: '',
                 date: new Date().toISOString(),
                 googleDocId,
+                googleDocContent: '',
             });
 
             await this.notesService.addTag(newNote.id, GOOGLE_NOTE_TAG);

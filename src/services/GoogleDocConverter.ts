@@ -119,7 +119,9 @@ export class GoogleDocConverter {
         content = this.convertTags(content);
 
         // Apply paragraph-level formatting
-        return this.applyParagraphStyle(content, paragraph.paragraphStyle);
+        // Append a trailing newline so that when top-level lines are joined with "\n",
+        // paragraphs are separated by a blank line (two newlines total)
+        return this.applyParagraphStyle(content, paragraph.paragraphStyle) + '\n';
     }
 
     private static convertListItem(
@@ -190,47 +192,66 @@ export class GoogleDocConverter {
             return '';
         }
 
-        let text = textRun.content;
+        const fullText = textRun.content;
         const style = textRun.textStyle;
 
-        // Check if this text should be treated as a tag based on formatting
+        // Tag-like formatting hint
+        let processed = fullText;
         if (style && this.isTagFormatting(style)) {
-            // If the text is formatted as a tag (e.g., highlighted, bold, specific color),
-            // and it looks like a tag, wrap it in [[]]
-            text = this.convertTags(text);
+            processed = this.convertTags(processed);
         }
 
         if (!style) {
-            return text;
+            return processed;
         }
 
-        // Apply text formatting
-        if (style.bold) {
-            text = `**${text}**`;
-        }
-        if (style.italic) {
-            text = `*${text}*`;
-        }
-        if (style.underline) {
-            text = `<u>${text}</u>`;
-        }
-        if (style.strikethrough) {
-            text = `~~${text}~~`;
-        }
+        const lines = processed.split('\n');
 
-        // Handle links
-        if (style.link?.url) {
-            text = `[${text}](${style.link.url})`;
-        }
+        const applyInlineStyles = (segment: string): string => {
+            if (segment.length === 0) return segment;
+            let s = segment;
 
-        // Handle code formatting (monospace font)
-        if (style.weightedFontFamily?.fontFamily === 'Courier New' ||
-            style.weightedFontFamily?.fontFamily === 'Consolas' ||
-            style.weightedFontFamily?.fontFamily === 'Monaco') {
-            text = `\`${text}\``;
-        }
+            // Escape a trailing asterisk when using single-style emphasis
+            // to avoid it merging with the closing marker
+            const endsWithUnescapedStar = (txt: string) => txt.endsWith('*') && (txt.length < 2 || txt.at(-2) !== '\\');
 
-        return text;
+            if (style.bold && !style.italic && endsWithUnescapedStar(s)) {
+                s = s.slice(0, -1) + '\\*';
+            }
+            if (style.italic && !style.bold && endsWithUnescapedStar(s)) {
+                s = s.slice(0, -1) + '\\*';
+            }
+
+            // Combine bold+italic as triple-asterisk emphasis
+            if (style.bold && style.italic) {
+                s = `***${s}***`;
+            } else if (style.bold) {
+                s = `**${s}**`;
+            } else if (style.italic) {
+                s = `*${s}*`;
+            }
+            if (style.underline) {
+                s = `<u>${s}</u>`;
+            }
+            if (style.strikethrough) {
+                s = `~~${s}~~`;
+            }
+            // Code font
+            if (style.weightedFontFamily?.fontFamily === 'Courier New' ||
+                style.weightedFontFamily?.fontFamily === 'Consolas' ||
+                style.weightedFontFamily?.fontFamily === 'Monaco') {
+                s = `\`${s}\``;
+            }
+            // Links last to wrap the entire segment
+            if (style.link?.url) {
+                s = `[${s}](${style.link.url})`;
+            }
+            return s;
+        };
+
+        // Style each line independently so markers never cross newlines
+        const styled = lines.map(applyInlineStyles).join('\n');
+        return styled;
     }
 
     /**
