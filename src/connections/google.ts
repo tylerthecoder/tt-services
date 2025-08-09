@@ -45,6 +45,16 @@ export class GoogleService {
         });
     }
 
+    public async getUserInfo(userId: string) {
+        const auth = await this.getAuthorizedClient(userId);
+        const authToken = await auth.getAccessToken();
+        if (!authToken.token) {
+            throw new Error('No access token found');
+        }
+        const user = await auth.getTokenInfo(authToken.token);
+        return user;
+    }
+
     /**
      * Exchange the authorization code for tokens
      */
