@@ -59,8 +59,8 @@ export class GoogleNoteService {
             const doc = await this.googleService.getGoogleDoc(userId, googleDocId);
 
             const newNote = await this.notesService.createNote<GoogleNote>({
-                title: doc.name || '',
-                content: '',  // We don't store the content in our DB since it lives in Google Docs
+                title: doc.title || doc.name || '',
+                content: '',
                 date: new Date().toISOString(),
                 googleDocId,
             });

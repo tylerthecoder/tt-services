@@ -11,13 +11,21 @@ export type Note<ExtraFields = {}> = {
   deleted?: boolean;
 } & ExtraFields
 
+export type NoteMetadata<ExtraFields = {}> = Omit<Note<ExtraFields>, 'content'>;
+
 export type GoogleNote = Note<{ googleDocId: string }>;
+export type GoogleNoteMetadata = NoteMetadata<{ googleDocId: string }>;
 
 export const GOOGLE_NOTE_TAG = 'google-doc';
 
 export const isGoogleNote = (note: Note): note is GoogleNote => {
-    const hasGoogleTag = note.tags?.includes(GOOGLE_NOTE_TAG) ?? false;
-    const hasGoogleDocId = 'googleDocId' in note;
-    console.log("hasGoogleTag", hasGoogleTag, hasGoogleDocId, note.content);
-    return hasGoogleTag && hasGoogleDocId;
+  const hasGoogleTag = note.tags?.includes(GOOGLE_NOTE_TAG) ?? false;
+  const hasGoogleDocId = 'googleDocId' in note;
+  return hasGoogleTag && hasGoogleDocId;
+}
+
+export const isGoogleNoteMetadata = (note: NoteMetadata): note is GoogleNoteMetadata => {
+  const hasGoogleTag = note.tags?.includes(GOOGLE_NOTE_TAG) ?? false;
+  const hasGoogleDocId = 'googleDocId' in note;
+  return hasGoogleTag && hasGoogleDocId;
 }

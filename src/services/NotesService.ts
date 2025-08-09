@@ -1,8 +1,7 @@
 import { Collection, ObjectId, WithId } from 'mongodb';
 import type { NoId } from '../connections/mongo.ts';
-import { Note } from './notes.ts';
+import { Note, NoteMetadata } from './notes.ts';
 
-export type NoteMetadata = Omit<Note, 'content'>;
 
 const convertNote = (note: WithId<NoId<Note>>): Note => {
   const new_note = {

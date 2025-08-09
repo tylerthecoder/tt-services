@@ -1,2 +1,2 @@
-export type { Note, GoogleNote } from './services/notes.ts';
-export { isGoogleNote } from './services/notes.ts';
+export type { Note, GoogleNote, GoogleNoteMetadata, NoteMetadata } from './services/notes.ts';
+export { isGoogleNote, isGoogleNoteMetadata } from './services/notes.ts';
