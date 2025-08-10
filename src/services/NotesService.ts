@@ -1,6 +1,6 @@
 import { Collection, ObjectId, WithId } from 'mongodb';
 import type { NoId } from '../connections/mongo.ts';
-import { Note, NoteMetadata } from './notes.ts';
+import { CreatableNote, Note, NoteMetadata } from './notes.ts';
 
 
 const convertNote = (note: WithId<NoId<Note>>): Note => {
@@ -43,10 +43,9 @@ export class NotesService {
     return result ? convertNote(result) : null;
   }
 
-  async createNote<T extends Note>(note: Omit<T, 'id' | 'createdAt' | 'updatedAt' | 'published' | 'tags'>): Promise<T> {
+  async createNote<T extends Note>(note: CreatableNote<T>): Promise<T> {
     const newNote = {
       ...note,
-      tags: [],
       published: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),

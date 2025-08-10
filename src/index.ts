@@ -19,5 +19,5 @@ export { GoogleService } from './connections/google.ts';
 export { DatabaseSingleton } from './connections/mongo.ts';
 export { GoogleNoteService } from './services/GoogleNoteService.ts';
 export { NotesService } from './services/NotesService.ts';
-export type { Note, GoogleNote, NoteMetadata } from './services/notes.ts';
+export type { Note, GoogleNote, NoteMetadata, NoteType } from './services/notes.ts';
 export { isGoogleNote } from './services/notes.ts';

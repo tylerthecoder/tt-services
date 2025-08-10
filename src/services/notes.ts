@@ -34,3 +34,7 @@ export const isGoogleNoteMetadata = (note: NoteMetadata): note is GoogleNoteMeta
   const hasGoogleDocId = 'googleDocId' in note;
   return hasGoogleTag && hasGoogleDocId;
 }
+
+export type NoteType = Note | GoogleNote;
+
+export type CreatableNote<ExtraFields = {}> = Omit<Note<ExtraFields>, 'id' | 'createdAt' | 'updatedAt' | 'published' | 'deleted'>;
