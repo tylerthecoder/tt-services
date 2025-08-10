@@ -4,7 +4,7 @@ import { BuyListService } from "./services/BuyListService.ts";
 import { TalkNotesService } from "./services/TalkNotesService.ts";
 import { ReadingListService } from "./services/ReadingListService.ts";
 import { NotesService } from "./services/NotesService.ts";
-import { MongoDBService } from "./connections/mongo.ts";
+import { DatabaseSingleton, MongoDBService } from "./connections/mongo.ts";
 import { CreationsService } from "./services/CreationsService.ts";
 import { SparksService } from "./services/SparksService.ts";
 import { MoviesService } from "./services/MoviesService.ts";
@@ -39,6 +39,12 @@ export class TylersThings {
         public readonly jots: JotsService,
         public readonly dailyNotes: DailyNoteService
     ) { }
+
+    static async buildAndConnect(): Promise<TylersThings> {
+        const db = await DatabaseSingleton.getInstance();
+        const tt = await TylersThings.make(db);
+        return tt;
+    }
 
     static async make(
         db: MongoDBService

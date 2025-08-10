@@ -15,7 +15,9 @@ import { Week } from '../services/WeeklyService.ts';
 import { List } from '../services/ListsService.ts';
 import { Spark } from '../services/SparksService.ts';
 import { Jot } from '../services/JotsService.ts';
+import { logger } from '../logger.ts';
 
+const log = logger.child({ module: 'MongoDBService' });
 
 dotenv.config();
 
@@ -83,9 +85,9 @@ export class MongoDBService {
 
   async connect(): Promise<void> {
     try {
-      console.log("Connecting to Mongodb...")
+      log.info("Connecting to Mongodb...")
       await this.client.connect();
-      console.log('Connected to MongoDB');
+      log.info('Connected to MongoDB');
       const database = this.client.db(this.db);
       this.planCollection = database.collection<NoId<Plan>>(PLAN_COLLECTION_NAME);
       this.todoCollection = database.collection<NoId<Todo>>(TODO_COLLECTION_NAME);
@@ -104,14 +106,14 @@ export class MongoDBService {
       this.googleTokenCollection = database.collection<NoId<GoogleToken>>(GOOGLE_TOKEN_COLLECTION_NAME);
       this.jotsCollection = database.collection<NoId<Jot>>(JOTS_COLLECTION_NAME);
     } catch (error) {
-      console.error('Error connecting to MongoDB:', error);
+      log.error(error, 'Error connecting to MongoDB');
       throw error;
     }
   }
 
   async close(): Promise<void> {
     await this.client.close();
-    console.log('Disconnected from MongoDB');
+    log.info('Disconnected from MongoDB');
   }
 
   getPlanCollection(): Collection<NoId<Plan>> {
@@ -238,14 +240,14 @@ export class DatabaseSingleton {
 
   public static async getInstance(): Promise<MongoDBService> {
     if (DatabaseSingleton.instance) {
-      console.log('Returning existing instance');
+      log.trace('Returning existing instance');
       return DatabaseSingleton.instance;
     }
 
     let connectPromise = DatabaseSingleton.connectPromise;
 
     if (!connectPromise) {
-      console.log('Creating new instance');
+      log.trace('Creating new instance');
       connectPromise = new Promise<MongoDBService>(async (resolve, reject) => {
         const instance = new MongoDBService();
         try {
@@ -259,7 +261,7 @@ export class DatabaseSingleton {
     }
 
     const instance = await connectPromise;
-    console.log('Returning new instance');
+    log.trace('Returning new instance');
     return instance;
   }
 }
