@@ -21,3 +21,6 @@ export { GoogleNoteService } from './services/GoogleNoteService.ts';
 export { NotesService } from './services/NotesService.ts';
 export type { Note, GoogleNote, NoteMetadata, NoteType } from './services/notes.ts';
 export { isGoogleNote } from './services/notes.ts';
+export { ChatsService } from './services/ChatsService.ts';
+export type { Chat, ChatMessage, ChatMessageRole, CreatableChat } from './services/ChatsService.ts';
+export { makeAgent } from './agent/agent.ts';

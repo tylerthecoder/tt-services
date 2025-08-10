@@ -15,6 +15,7 @@ import { Week } from '../services/WeeklyService.ts';
 import { List } from '../services/ListsService.ts';
 import { Spark } from '../services/SparksService.ts';
 import { Jot } from '../services/JotsService.ts';
+import { Chat } from '../services/ChatsService.ts';
 import { logger } from '../logger.ts';
 
 const log = logger.child({ module: 'MongoDBService' });
@@ -45,6 +46,7 @@ const PLAN_COLLECTION_NAME = 'plans';
 const TIME_BLOCK_COLLECTION_NAME = 'timeblocks';
 const GOOGLE_TOKEN_COLLECTION_NAME = 'googletokens';
 const JOTS_COLLECTION_NAME = 'jots';
+const CHATS_COLLECTION_NAME = 'chats';
 
 export class MongoDBService {
   private readonly client: MongoClient;
@@ -65,6 +67,7 @@ export class MongoDBService {
   private listCollection?: Collection<NoId<List>>;
   private googleTokenCollection?: Collection<NoId<GoogleToken>>;
   private jotsCollection?: Collection<NoId<Jot>>;
+  private chatsCollection?: Collection<NoId<Chat>>;
 
   constructor() {
     const uri = process.env.DB_URI;
@@ -105,6 +108,7 @@ export class MongoDBService {
       this.listCollection = database.collection<NoId<List>>('lists');
       this.googleTokenCollection = database.collection<NoId<GoogleToken>>(GOOGLE_TOKEN_COLLECTION_NAME);
       this.jotsCollection = database.collection<NoId<Jot>>(JOTS_COLLECTION_NAME);
+      this.chatsCollection = database.collection<NoId<Chat>>(CHATS_COLLECTION_NAME);
     } catch (error) {
       log.error(error, 'Error connecting to MongoDB');
       throw error;
@@ -228,6 +232,14 @@ export class MongoDBService {
       throw new Error('MongoDB Jots collection is not initialized. Did you forget to call connect()?');
     }
     return this.jotsCollection;
+  }
+
+  // Getter for Chats collection
+  getChatsCollection(): Collection<NoId<Chat>> {
+    if (!this.chatsCollection) {
+      throw new Error('MongoDB Chats collection is not initialized. Did you forget to call connect()?');
+    }
+    return this.chatsCollection;
   }
 }
 

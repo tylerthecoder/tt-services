@@ -17,6 +17,7 @@ import { ListsService } from './services/ListsService.ts';
 import { GoogleService } from './connections/google.ts';
 import { JotsService } from './services/JotsService.ts';
 import { DailyNoteService } from './services/DailyNoteService.ts';
+import { ChatsService } from './services/ChatsService.ts';
 
 export class TylersThings {
     constructor(
@@ -37,7 +38,8 @@ export class TylersThings {
         public readonly lists: ListsService,
         public readonly google: GoogleService,
         public readonly jots: JotsService,
-        public readonly dailyNotes: DailyNoteService
+        public readonly dailyNotes: DailyNoteService,
+        public readonly chats: ChatsService,
     ) { }
 
     static async buildAndConnect(): Promise<TylersThings> {
@@ -67,6 +69,7 @@ export class TylersThings {
         const lists = new ListsService(db.getListCollection());
         const jots = new JotsService(db.getJotsCollection());
         const dailyNotes = new DailyNoteService(notes);
+        const chats = new ChatsService(db.getChatsCollection());
 
         return new TylersThings(
             dailyPlans,
@@ -86,7 +89,8 @@ export class TylersThings {
             lists,
             google,
             jots,
-            dailyNotes
+            dailyNotes,
+            chats,
         );
     }
 }
