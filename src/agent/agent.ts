@@ -39,9 +39,9 @@ const getNotesByIdsTool = tool({
 const updateNoteTagsTool = tool({
   name: 'update_note_tags',
   description: 'Update the tags of a note',
-  parameters: z.object({ id: z.string(), tags: z.array(z.string()) }),
+  parameters: z.object({ noteId: z.string(), tags: z.array(z.string()) }),
   execute: async (input) => {
-    const note = await tt.notes.updateNote(input.id, { tags: input.tags });
+    const note = await tt.notes.updateNote(input.noteId, { tags: input.tags });
     return note;
   },
   needsApproval: true,

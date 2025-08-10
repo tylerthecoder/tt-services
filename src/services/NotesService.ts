@@ -43,6 +43,11 @@ export class NotesService {
     return result ? convertNote(result) : null;
   }
 
+  async getNoteMetadataById(id: string): Promise<NoteMetadata | null> {
+    const result = await this.noteCollection.findOne({ _id: new ObjectId(id) }, { projection: { content: 0 } });
+    return result ? convertNote(result) : null;
+  }
+
   async getNotesByIds(ids: string[]): Promise<Note[]> {
     const results = await this.noteCollection.find({ _id: { $in: ids.map(id => new ObjectId(id)) } }).toArray();
     return results.map(result => convertNote(result));
