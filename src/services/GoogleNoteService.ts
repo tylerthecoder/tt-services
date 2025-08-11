@@ -1,7 +1,8 @@
 import { NotesService } from './NotesService.js';
 import { GoogleService } from '../connections/google.js';
-import { Note, GoogleNote, GOOGLE_NOTE_TAG } from './notes.ts';
+import { Note, GoogleNote, GOOGLE_NOTE_TAG, GoogleNoteMetadata, isGoogleNoteMetadata, NoteMetadata } from './notes.ts';
 import { GoogleDocConverter } from './GoogleDocConverter.ts';
+import { drive_v3 } from 'googleapis';
 
 export class GoogleNoteService {
     constructor(
@@ -21,9 +22,23 @@ export class GoogleNoteService {
         return notes.filter((note: Note): note is GoogleNote => 'googleDocId' in note);
     }
 
+    async getAllGoogleNotesMetadata(): Promise<GoogleNoteMetadata[]> {
+        const notes = await this.notesService.getNotesByTag(GOOGLE_NOTE_TAG);
+        return notes.filter((note: Note): note is GoogleNote => 'googleDocId' in note);
+    }
+
     async getGoogleNoteById(id: string): Promise<GoogleNote | null> {
         const note = await this.notesService.getNoteById(id);
         return note && 'googleDocId' in note ? note as GoogleNote : null;
+    }
+
+    async getAllNotesAndUntrackedGoogleDocs(userId: string): Promise<{ notes: NoteMetadata[], googleDocs: drive_v3.Schema$File[] }> {
+        const notesMetadata = await this.notesService.getAllNotesMetadata();
+        const googleDocs = await this.googleService.getUserDocs(userId);
+        const googleNoteMetadatas = notesMetadata.filter(isGoogleNoteMetadata);
+
+        const filteredGoogleDocs = googleDocs.filter((doc: drive_v3.Schema$File) => !googleNoteMetadatas.some((note) => note.googleDocId === doc.id));
+        return { notes: notesMetadata, googleDocs: filteredGoogleDocs };
     }
 
     async saveContentFromGoogleDoc(id: string, userId: string): Promise<void> {

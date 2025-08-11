@@ -30,6 +30,14 @@ export class NotesService {
     return results.map(result => convertNote(result));
   }
 
+  async getNotesMetadataByTag(tag: string): Promise<NoteMetadata[]> {
+    const results = await this.noteCollection
+      .find({ deleted: { $ne: true }, tags: tag }, { projection: { content: 0 } })
+      .sort({ date: -1 })
+      .toArray();
+    return results.map(result => convertNote(result));
+  }
+
   async getPublishedNotes(): Promise<Note[]> {
     const results = await this.noteCollection
       .find({ published: true })
