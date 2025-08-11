@@ -1,5 +1,4 @@
 import { MongoClient, Collection, ServerApiVersion } from 'mongodb';
-import dotenv from 'dotenv';
 import { Note } from '../services/notes.ts';
 import { Plan } from '../services/DailyPlansService.ts';
 import { Todo } from '../services/TodoService.ts';
@@ -16,11 +15,40 @@ import { List } from '../services/ListsService.ts';
 import { Spark } from '../services/SparksService.ts';
 import { Jot } from '../services/JotsService.ts';
 import { Chat } from '../services/ChatsService.ts';
-import { logger } from '../logger.ts';
+import { Logger } from 'pino';
 
-const log = logger.child({ module: 'MongoDBService' });
+let dbServiceInstance: MongoDBService | null = null;
+let connectPromise: Promise<MongoDBService> | null = null;
 
-dotenv.config();
+export const getDatabase = async (logger: Logger): Promise<MongoDBService> => {
+  logger = logger.child({
+    module: "getDatabase",
+    filename: import.meta.url,
+  });
+
+  if (dbServiceInstance) {
+    logger.trace('Returning existing instance');
+    return dbServiceInstance;
+  }
+
+  if (!connectPromise) {
+    logger.trace('Creating new instance');
+    connectPromise = new Promise<MongoDBService>(async (resolve, reject) => {
+      const instance = new MongoDBService(logger);
+      try {
+        await instance.connect();
+        resolve(instance);
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
+  const instance = await connectPromise;
+  logger.trace('Returning new instance');
+  return instance;
+}
+
 
 export type NoId<T> = Omit<T, 'id'>;
 
@@ -51,6 +79,7 @@ const CHATS_COLLECTION_NAME = 'chats';
 export class MongoDBService {
   private readonly client: MongoClient;
   private readonly db: string;
+  private readonly logger: Logger;
   private todoCollection?: Collection<NoId<Todo>>;
   private buyListCollection?: Collection<NoId<BuyListItem>>;
   private talkNoteCollection?: Collection<NoId<TalkNote>>;
@@ -69,7 +98,14 @@ export class MongoDBService {
   private jotsCollection?: Collection<NoId<Jot>>;
   private chatsCollection?: Collection<NoId<Chat>>;
 
-  constructor() {
+  constructor(
+    logger: Logger,
+  ) {
+    this.logger = logger.child({
+      module: "MongoDBService",
+      filename: import.meta.url,
+    });
+
     const uri = process.env.DB_URI;
     this.db = DB_NAME;
 
@@ -88,9 +124,11 @@ export class MongoDBService {
 
   async connect(): Promise<void> {
     try {
-      log.info("Connecting to Mongodb...")
+      this.logger.info("Connecting to Mongodb...")
+      const start = Date.now();
       await this.client.connect();
-      log.info('Connected to MongoDB');
+      const duration = Date.now() - start;
+      this.logger.info({ duration }, 'Connected to MongoDB');
       const database = this.client.db(this.db);
       this.planCollection = database.collection<NoId<Plan>>(PLAN_COLLECTION_NAME);
       this.todoCollection = database.collection<NoId<Todo>>(TODO_COLLECTION_NAME);
@@ -110,14 +148,15 @@ export class MongoDBService {
       this.jotsCollection = database.collection<NoId<Jot>>(JOTS_COLLECTION_NAME);
       this.chatsCollection = database.collection<NoId<Chat>>(CHATS_COLLECTION_NAME);
     } catch (error) {
-      log.error(error, 'Error connecting to MongoDB');
+      this.logger.error(error, 'Error connecting to MongoDB');
       throw error;
     }
   }
 
   async close(): Promise<void> {
     await this.client.close();
-    log.info('Disconnected from MongoDB');
+    this.logger.info('Disconnected from MongoDB');
+    dbServiceInstance = null;
   }
 
   getPlanCollection(): Collection<NoId<Plan>> {
@@ -234,46 +273,10 @@ export class MongoDBService {
     return this.jotsCollection;
   }
 
-  // Getter for Chats collection
   getChatsCollection(): Collection<NoId<Chat>> {
     if (!this.chatsCollection) {
       throw new Error('MongoDB Chats collection is not initialized. Did you forget to call connect()?');
     }
     return this.chatsCollection;
-  }
-}
-
-export class DatabaseSingleton {
-  private static instance: MongoDBService | null = null;
-
-  private static connectPromise: Promise<MongoDBService> | null = null;
-
-  private constructor() { }
-
-  public static async getInstance(): Promise<MongoDBService> {
-    if (DatabaseSingleton.instance) {
-      log.trace('Returning existing instance');
-      return DatabaseSingleton.instance;
-    }
-
-    let connectPromise = DatabaseSingleton.connectPromise;
-
-    if (!connectPromise) {
-      log.trace('Creating new instance');
-      connectPromise = new Promise<MongoDBService>(async (resolve, reject) => {
-        const instance = new MongoDBService();
-        try {
-          await instance.connect();
-          resolve(instance);
-        } catch (error) {
-          reject(error);
-        }
-      });
-      DatabaseSingleton.connectPromise = connectPromise;
-    }
-
-    const instance = await connectPromise;
-    log.trace('Returning new instance');
-    return instance;
   }
 }

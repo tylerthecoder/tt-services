@@ -4,7 +4,7 @@ import { BuyListService } from "./services/BuyListService.ts";
 import { TalkNotesService } from "./services/TalkNotesService.ts";
 import { ReadingListService } from "./services/ReadingListService.ts";
 import { NotesService } from "./services/NotesService.ts";
-import { DatabaseSingleton, MongoDBService } from "./connections/mongo.ts";
+import { getDatabase, MongoDBService } from "./connections/mongo.ts";
 import { CreationsService } from "./services/CreationsService.ts";
 import { SparksService } from "./services/SparksService.ts";
 import { MoviesService } from "./services/MoviesService.ts";
@@ -18,9 +18,18 @@ import { GoogleService } from './connections/google.ts';
 import { JotsService } from './services/JotsService.ts';
 import { DailyNoteService } from './services/DailyNoteService.ts';
 import { ChatsService } from './services/ChatsService.ts';
+import { logger as defaultLogger } from "./logger.ts";
+import { Logger } from "pino";
+import dotenv from "dotenv";
+
+let instance: TylersThings | null = null;
+
+dotenv.config();
 
 export class TylersThings {
     constructor(
+        private readonly logger: Logger,
+        private readonly db: MongoDBService,
         public readonly dailyPlans: DailyPlansService,
         public readonly todo: TodoService,
         public readonly buyList: BuyListService,
@@ -42,15 +51,22 @@ export class TylersThings {
         public readonly chats: ChatsService,
     ) { }
 
-    static async buildAndConnect(): Promise<TylersThings> {
-        const db = await DatabaseSingleton.getInstance();
-        const tt = await TylersThings.make(db);
-        return tt;
-    }
-
     static async make(
-        db: MongoDBService
+        config: {
+            db?: MongoDBService,
+            logger?: Logger,
+            useInstance?: boolean
+        } = {}
     ): Promise<TylersThings> {
+        if (instance && (config.useInstance ?? true)) {
+            return instance;
+        }
+        const logger = config.logger ?? defaultLogger.child({
+            module: "TylersThings",
+        });
+
+        const db = config.db ?? await getDatabase(logger);
+
         const notes = new NotesService(db.getNoteCollection());
         const dailyPlans = new DailyPlansService(db.getPlanCollection());
         const todo = new TodoService(db.getTodoCollection());
@@ -61,7 +77,7 @@ export class TylersThings {
         const sparks = new SparksService(db.getSparkCollection());
         const movies = new MoviesService(db.getMoviesCollection());
         const techies = new TechieService(notes);
-        const google = new GoogleService(db);
+        const google = new GoogleService(db, logger);
         const weekendProjects = new WeekendProjectService(db.getWeekendProjectCollection());
         const googleNotes = new GoogleNoteService(notes, google);
         const timeTracker = new TimeTrackerService(db.getTimeBlockCollection());
@@ -71,7 +87,9 @@ export class TylersThings {
         const dailyNotes = new DailyNoteService(notes);
         const chats = new ChatsService(db.getChatsCollection());
 
-        return new TylersThings(
+        instance = new TylersThings(
+            logger,
+            db,
             dailyPlans,
             todo,
             buyList,
@@ -92,5 +110,12 @@ export class TylersThings {
             dailyNotes,
             chats,
         );
+
+        return instance;
+    }
+
+    async disconnect() {
+        this.logger.info("Disconnecting from database");
+        await this.db.close();
     }
 }

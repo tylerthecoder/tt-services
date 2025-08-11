@@ -16,7 +16,6 @@ export { ListsService } from './services/ListsService.ts';
 export { WeeklyService } from './services/WeeklyService.ts';
 export { GoogleTokenService } from './services/GoogleTokenService.ts';
 export { GoogleService } from './connections/google.ts';
-export { DatabaseSingleton } from './connections/mongo.ts';
 export { GoogleNoteService } from './services/GoogleNoteService.ts';
 export { NotesService } from './services/NotesService.ts';
 export type { Note, GoogleNote, NoteMetadata, NoteType } from './services/notes.ts';

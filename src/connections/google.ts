@@ -1,10 +1,8 @@
 import { google } from 'googleapis';
 import { OAuth2Client } from 'google-auth-library';
-import { DatabaseSingleton, GoogleToken, MongoDBService, NoId } from './mongo.ts';
+import { GoogleToken, MongoDBService, NoId } from './mongo.ts';
+import { Logger } from 'pino';
 
-const log = (...args: any[]) => {
-    console.log("GoogleService: ", ...args);
-}
 const SCOPES = [
     'https://www.googleapis.com/auth/drive.readonly',
     'https://www.googleapis.com/auth/documents.readonly',
@@ -16,7 +14,8 @@ export class GoogleService {
     private oauth2Client: OAuth2Client;
 
     constructor(
-        private readonly db: MongoDBService
+        private readonly db: MongoDBService,
+        private readonly logger: Logger,
     ) {
         const GOOGLE_CREDS = JSON.parse(process.env.GOOGLE_CREDS || '{}');
 
@@ -109,7 +108,7 @@ export class GoogleService {
                 return { id: result.insertedId.toString(), ...newToken };
             }
         } catch (error) {
-            log('Error getting tokens:', error);
+            this.logger.error(error, 'Error getting tokens');
             throw error;
         }
     }
@@ -119,8 +118,7 @@ export class GoogleService {
      */
     public async getAuthorizedClient(userId: string): Promise<OAuth2Client> {
         try {
-            const db = await DatabaseSingleton.getInstance();
-            const tokenCollection = db.getGoogleTokenCollection();
+            const tokenCollection = this.db.getGoogleTokenCollection();
             const token = await tokenCollection.findOne({ userId });
 
             if (!token) {
@@ -135,9 +133,8 @@ export class GoogleService {
 
             // Check if token needs refresh
             if (Date.now() >= token.expiryDate) {
-                log('Token expired, refreshing...');
+                this.logger.info('Token expired, refreshing...');
                 const { credentials } = await this.oauth2Client.refreshAccessToken();
-                log('New token: ');
 
                 // Update token in DB
                 await tokenCollection.updateOne(
@@ -154,7 +151,7 @@ export class GoogleService {
 
             return this.oauth2Client;
         } catch (error) {
-            log('Error getting authorized client:', error);
+            this.logger.error(error, 'Error getting authorized client');
             throw error;
         }
     }
@@ -176,7 +173,7 @@ export class GoogleService {
 
             return response.data.files || [];
         } catch (error) {
-            log('Error getting user docs:', error);
+            this.logger.error(error, 'Error getting user docs');
             throw error;
         }
     }
@@ -192,12 +189,13 @@ export class GoogleService {
 
             return response.data;
         } catch (error) {
-            log('Error getting Google Doc:', error);
+            this.logger.error(error, 'Error getting Google Doc');
             throw error;
         }
     }
 
     public async createGoogleDoc(userId: string, title: string): Promise<string> {
+        this.logger.info({ userId, title }, 'Creating Google Doc');
         const auth = await this.getAuthorizedClient(userId);
         const drive = google.drive({ version: 'v3', auth });
 
@@ -230,28 +228,17 @@ export class GoogleService {
                     .join('') || '')
                 .join('\n') || '';
         } catch (error) {
-            log('Error getting doc content:', error);
+            this.logger.error(error, 'Error getting doc content');
             throw error;
         }
     }
 
-    // Keep the existing method for backward compatibility
     public async getDocs(pageSize: number = 100) {
-        console.log(process.env.GOOGLE_API_KEY);
         const drive = google.drive({ version: 'v3', auth: process.env.GOOGLE_API_KEY });
-
-        // // Get user info from drive API
-        // const about = await drive.about.get({
-        //     fields: 'user'
-        // });
-
-        // console.log('Google Drive User:', about.data.user);
 
         const driveResponse = await drive.drives.list({
             pageSize: 10,
         });
-
-        console.log(driveResponse);
 
         try {
             const response = await drive.files.list({
@@ -261,17 +248,11 @@ export class GoogleService {
                 fields: 'files(id, name)'
             });
 
-            console.log(response);
-
             const docs = response.data.files;
-
-            console.log('List of Google Docs:');
 
             if (!docs) {
                 throw new Error("No docs found");
             }
-
-            console.log(docs);
 
             docs.forEach(doc => {
                 console.log(`- ${doc.name} (ID: ${doc.id})`);
