@@ -1,10 +1,9 @@
-import { DatabaseSingleton, GoogleToken, MongoDBService, NoId } from '../connections/mongo.ts';
+import { GoogleToken, MongoDBService, NoId } from '../connections/mongo.ts';
 
 export class GoogleTokenService {
-    private readonly db: MongoDBService;
-
-    constructor(db: MongoDBService) {
-        this.db = db;
+    constructor(
+        private readonly db: MongoDBService
+    ) {
     }
 
     /**

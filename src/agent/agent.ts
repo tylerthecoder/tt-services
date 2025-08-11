@@ -2,15 +2,11 @@ import { z } from '@openai/zod/v3';
 import { Agent, tool } from '@openai/agents';
 import { TylersThings } from '../lib.ts';
 
-
-export const makeAgent = async (tt?: TylersThings | undefined) => {
-  if (!tt) {
-    tt = await TylersThings.buildAndConnect();
-  }
+export const makeAgent = async (tt: TylersThings) => {
 
   const getNoteTool = tool({
     name: 'get_note',
-    description: 'Get a note by id',
+    description: 'Get a note\'s content by id',
     parameters: z.object({ id: z.string() }).strict(),
     execute: async (input) => {
       const note = await tt.notes.getNoteById(input.id);
@@ -26,8 +22,6 @@ export const makeAgent = async (tt?: TylersThings | undefined) => {
       const notes = await tt.notes.getAllNotesMetadata();
       return notes;
     },
-
-    needsApproval: true,
   });
 
   const getNotesByIdsTool = tool({
