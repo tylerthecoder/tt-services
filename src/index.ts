@@ -24,3 +24,4 @@ export { isGoogleNote } from './services/notes.ts';
 export { ChatsService } from './services/ChatsService.ts';
 export type { Chat, ChatMessage, ChatMessageRole, CreatableChat } from './services/ChatsService.ts';
 export { makeAgent } from './agent/agent.ts';
+export { Agent, run, RunResult, RunState, RunToolApprovalItem } from '@openai/agents';
