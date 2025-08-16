@@ -61,13 +61,36 @@ export class NotesService {
     return results.map(result => convertNote(result));
   }
 
+  async getNotesByDate(date: string): Promise<Note[]> {
+    const results = await this.noteCollection
+      .find({ date: date })
+      .sort({ createdAt: -1 })
+      .toArray();
+    return results.map(result => convertNote(result));
+  }
+
+  async getAllTags(): Promise<string[]> {
+    // Get all unique tags from non-deleted notes
+    const tags = await this.noteCollection.distinct('tags', { deleted: { $ne: true } });
+    // Filter out any null or undefined values and sort alphabetically
+    return tags.filter(tag => tag !== undefined).sort();
+  }
+
+  async getNotesByTag(tag: string): Promise<Note[]> {
+    const results = await this.noteCollection
+      .find({ tags: tag })
+      .sort({ createdAt: -1 })
+      .toArray();
+    return results.map(result => ({ ...result, id: result._id.toString() }));
+  }
+
   async createNote<T extends Note>(note: CreatableNote<T>): Promise<T> {
-    const newNote = {
+    const newNote: NoId<Note> = {
       ...note,
       published: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-    } as NoId<Note>;
+    };
 
     const result = await this.noteCollection.insertOne(newNote);
     return { ...newNote, id: result.insertedId.toString() } as T;
@@ -94,27 +117,6 @@ export class NotesService {
     return { ...result, id: result._id.toString() } as unknown as T;
   }
 
-  async publishNote(id: string): Promise<Note> {
-    return this.updateNote(id, { published: true });
-  }
-
-  async unpublishNote(id: string): Promise<Note> {
-    return this.updateNote(id, { published: false });
-  }
-
-  async deleteNote(id: string): Promise<boolean> {
-    const result = await this.noteCollection.deleteOne({ _id: new ObjectId(id) });
-    return result.deletedCount === 1;
-  }
-
-  async getNotesByDate(date: string): Promise<Note[]> {
-    const results = await this.noteCollection
-      .find({ date: date })
-      .sort({ createdAt: -1 })
-      .toArray();
-    return results.map(result => ({ ...result, id: result._id.toString() }));
-  }
-
   async addTag(id: string, tag: string): Promise<Note> {
     const note = await this.getNoteById(id);
     if (!note) throw new Error(`Note ${id} not found`);
@@ -135,12 +137,17 @@ export class NotesService {
     return this.updateNote(id, { tags });
   }
 
-  async getNotesByTag(tag: string): Promise<Note[]> {
-    const results = await this.noteCollection
-      .find({ tags: tag })
-      .sort({ createdAt: -1 })
-      .toArray();
-    return results.map(result => ({ ...result, id: result._id.toString() }));
+  async publishNote(id: string): Promise<Note> {
+    return this.updateNote(id, { published: true });
+  }
+
+  async unpublishNote(id: string): Promise<Note> {
+    return this.updateNote(id, { published: false });
+  }
+
+  async deleteNote(id: string): Promise<boolean> {
+    const result = await this.noteCollection.deleteOne({ _id: new ObjectId(id) });
+    return result.deletedCount === 1;
   }
 
   async softDeleteNote(id: string): Promise<boolean> {
@@ -154,12 +161,5 @@ export class NotesService {
       }
     );
     return result.modifiedCount === 1;
-  }
-
-  async getAllTags(): Promise<string[]> {
-    // Get all unique tags from non-deleted notes
-    const tags = await this.noteCollection.distinct('tags', { deleted: { $ne: true } });
-    // Filter out any null or undefined values and sort alphabetically
-    return tags.filter(tag => tag !== undefined).sort();
   }
 }

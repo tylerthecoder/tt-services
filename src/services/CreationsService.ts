@@ -16,7 +16,7 @@ export type Creation = {
 export class CreationsService {
     constructor(
         private readonly creationsCollection: Collection<NoId<Creation>>
-    ) {}
+    ) { }
 
     async getAllCreations(): Promise<Creation[]> {
         const results = await this.creationsCollection.find().toArray();
@@ -120,7 +120,6 @@ export class CreationsService {
 
     async getPublishedCreations(): Promise<Creation[]> {
         const results = await this.creationsCollection.find({ published: true }).toArray();
-        console.log("Got published creations", results);
         return results.map(result => ({ ...result, id: result._id.toString() }));
     }
 }
