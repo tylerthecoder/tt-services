@@ -21,6 +21,7 @@ import { ChatsService } from './services/ChatsService.ts';
 import { logger as defaultLogger } from "./logger.ts";
 import { Logger } from "pino";
 import dotenv from "dotenv";
+import { SessionService } from './services/SessionService.ts';
 
 let instance: TylersThings | null = null;
 
@@ -49,6 +50,7 @@ export class TylersThings {
         public readonly jots: JotsService,
         public readonly dailyNotes: DailyNoteService,
         public readonly chats: ChatsService,
+        public readonly sessions: SessionService,
     ) { }
 
     static async make(
@@ -86,6 +88,7 @@ export class TylersThings {
         const jots = new JotsService(db.getJotsCollection());
         const dailyNotes = new DailyNoteService(notes);
         const chats = new ChatsService(db.getChatsCollection());
+        const sessions = new SessionService(db.getSessionsCollection());
 
         instance = new TylersThings(
             logger,
@@ -109,6 +112,7 @@ export class TylersThings {
             jots,
             dailyNotes,
             chats,
+            sessions,
         );
 
         return instance;

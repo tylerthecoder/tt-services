@@ -16,6 +16,7 @@ import { Spark } from '../services/SparksService.ts';
 import { Jot } from '../services/JotsService.ts';
 import { Chat } from '../services/ChatsService.ts';
 import { Logger } from 'pino';
+import { SessionRecord } from '../services/SessionService.ts';
 
 let dbServiceInstance: MongoDBService | null = null;
 let connectPromise: Promise<MongoDBService> | null = null;
@@ -75,6 +76,7 @@ const TIME_BLOCK_COLLECTION_NAME = 'timeblocks';
 const GOOGLE_TOKEN_COLLECTION_NAME = 'googletokens';
 const JOTS_COLLECTION_NAME = 'jots';
 const CHATS_COLLECTION_NAME = 'chats';
+const SESSIONS_COLLECTION_NAME = 'sessions';
 
 export class MongoDBService {
   private readonly client: MongoClient;
@@ -97,6 +99,7 @@ export class MongoDBService {
   private googleTokenCollection?: Collection<NoId<GoogleToken>>;
   private jotsCollection?: Collection<NoId<Jot>>;
   private chatsCollection?: Collection<NoId<Chat>>;
+  private sessionsCollection?: Collection<NoId<SessionRecord>>;
 
   constructor(
     logger: Logger,
@@ -147,6 +150,7 @@ export class MongoDBService {
       this.googleTokenCollection = database.collection<NoId<GoogleToken>>(GOOGLE_TOKEN_COLLECTION_NAME);
       this.jotsCollection = database.collection<NoId<Jot>>(JOTS_COLLECTION_NAME);
       this.chatsCollection = database.collection<NoId<Chat>>(CHATS_COLLECTION_NAME);
+      this.sessionsCollection = database.collection<NoId<SessionRecord>>(SESSIONS_COLLECTION_NAME);
     } catch (error) {
       this.logger.error(error, 'Error connecting to MongoDB');
       throw error;
@@ -278,5 +282,12 @@ export class MongoDBService {
       throw new Error('MongoDB Chats collection is not initialized. Did you forget to call connect()?');
     }
     return this.chatsCollection;
+  }
+
+  getSessionsCollection(): Collection<NoId<SessionRecord>> {
+    if (!this.sessionsCollection) {
+      throw new Error('MongoDB Sessions collection is not initialized. Did you forget to call connect()?');
+    }
+    return this.sessionsCollection;
   }
 }
