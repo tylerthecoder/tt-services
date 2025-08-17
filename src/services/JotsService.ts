@@ -1,4 +1,4 @@
-import { Collection, ObjectId } from 'mongodb';
+import { Collection, ObjectId, WithId } from 'mongodb';
 import type { NoId } from '../connections/mongo.ts';
 
 export type Jot = {
@@ -6,6 +6,14 @@ export type Jot = {
     text: string;
     createdAt: string;
 }
+
+const convertJot = (jot: WithId<NoId<Jot>>): Jot => {
+    const id = jot._id.toString();
+    const allButId = Object.fromEntries(
+        Object.entries(jot).filter(([key]) => key !== '_id')
+    ) as NoId<Jot>;
+    return { ...allButId, id };
+};
 
 export class JotsService {
     constructor(
@@ -15,7 +23,7 @@ export class JotsService {
     async getAllJots(): Promise<Jot[]> {
         // Sort by creation date descending to get newest first
         const results = await this.jotsCollection.find().sort({ createdAt: -1 }).toArray();
-        return results.map(result => ({ ...result, id: result._id.toString() }));
+        return results.map(convertJot);
     }
 
     async createJot(text: string): Promise<Jot> {
@@ -25,7 +33,7 @@ export class JotsService {
         };
 
         const result = await this.jotsCollection.insertOne(newJot);
-        return { ...newJot, id: result.insertedId.toString() };
+        return convertJot({ ...newJot, _id: result.insertedId });
     }
 
     async deleteJot(id: string): Promise<boolean> {

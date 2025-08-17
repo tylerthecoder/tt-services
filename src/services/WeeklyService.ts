@@ -1,4 +1,4 @@
-import { Collection, ObjectId } from 'mongodb';
+import { Collection, ObjectId, WithId } from 'mongodb';
 import { NoId } from '../connections/mongo.ts';
 import { NotesService } from './NotesService.ts';
 
@@ -19,6 +19,14 @@ export type Week = {
     createdAt: string;
     updatedAt: string;
 }
+
+const convertWeek = (week: WithId<NoId<Week>>): Week => {
+    const id = week._id.toString();
+    const allButId = Object.fromEntries(
+        Object.entries(week).filter(([key]) => key !== '_id')
+    ) as NoId<Week>;
+    return { ...allButId, id };
+};
 
 export class WeeklyService {
     constructor(
@@ -110,7 +118,7 @@ export class WeeklyService {
             );
         }
 
-        return { ...currentWeek, id: currentWeek._id.toString() };
+        return convertWeek(currentWeek);
     }
 
     async addTodo(weekId: string, content: string): Promise<Week> {
@@ -134,7 +142,7 @@ export class WeeklyService {
             throw new Error(`Week with id ${weekId} not found`);
         }
 
-        return { ...result, id: result._id.toString() };
+        return convertWeek(result);
     }
 
     async toggleTodo(weekId: string, todoId: string, checked: boolean): Promise<Week> {
@@ -154,7 +162,7 @@ export class WeeklyService {
             throw new Error(`Week with id ${weekId} or todo with id ${todoId} not found`);
         }
 
-        return { ...result, id: result._id.toString() };
+        return convertWeek(result);
     }
 
     async updateTodoContent(weekId: string, todoId: string, content: string): Promise<Week> {
@@ -174,7 +182,7 @@ export class WeeklyService {
             throw new Error(`Week with id ${weekId} or todo with id ${todoId} not found`);
         }
 
-        return { ...result, id: result._id.toString() };
+        return convertWeek(result);
     }
 
     async deleteTodo(weekId: string, todoId: string): Promise<Week> {
@@ -191,6 +199,6 @@ export class WeeklyService {
             throw new Error(`Week with id ${weekId} or todo with id ${todoId} not found`);
         }
 
-        return { ...result, id: result._id.toString() };
+        return convertWeek(result);
     }
 }

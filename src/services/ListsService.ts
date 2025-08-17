@@ -1,4 +1,4 @@
-import { Collection, ObjectId } from 'mongodb';
+import { Collection, ObjectId, WithId } from 'mongodb';
 import type { NoId } from '../connections/mongo.js';
 
 export type ListItem = {
@@ -18,6 +18,20 @@ export type List = {
     updatedAt: string;
 }
 
+export const convertList = (list: WithId<NoId<List>>): List => {
+    const id = list._id.toString();
+    const allButId = Object.fromEntries(
+        Object.entries(list).filter(([key]) => key !== '_id' && key !== 'items')
+    ) as NoId<List>;
+
+    const newList: List = {
+        ...allButId,
+        id,
+        items: list.items
+    }
+    return newList;
+};
+
 export class ListsService {
     constructor(
         private readonly listCollection: Collection<NoId<List>>
@@ -25,12 +39,12 @@ export class ListsService {
 
     async getAllLists(): Promise<List[]> {
         const results = await this.listCollection.find().sort({ createdAt: -1 }).toArray();
-        return results.map(result => ({ ...result, id: result._id.toString() }));
+        return results.map(convertList);
     }
 
     async getListById(id: string): Promise<List | null> {
         const result = await this.listCollection.findOne({ _id: new ObjectId(id) });
-        return result ? { ...result, id: result._id.toString() } : null;
+        return result ? convertList(result) : null;
     }
 
     async createList(name: string): Promise<List> {
@@ -42,7 +56,7 @@ export class ListsService {
         };
 
         const result = await this.listCollection.insertOne(newList);
-        return { ...newList, id: result.insertedId.toString() };
+        return convertList({ ...newList, _id: result.insertedId });
     }
 
     async addItemToList(listId: string, content: string): Promise<List> {
@@ -66,7 +80,7 @@ export class ListsService {
             throw new Error(`List with id ${listId} not found`);
         }
 
-        return { ...result, id: result._id.toString() };
+        return convertList(result);
     }
 
     async toggleItemCheck(listId: string, itemId: string): Promise<List> {
@@ -89,7 +103,7 @@ export class ListsService {
         );
 
         if (!result) throw new Error(`Failed to update item ${itemId}`);
-        return { ...result, id: result._id.toString() };
+        return convertList(result);
     }
 
     async addNoteToItem(listId: string, itemId: string, noteId: string): Promise<List> {
@@ -106,7 +120,7 @@ export class ListsService {
         );
 
         if (!result) throw new Error(`Failed to add note to item ${itemId}`);
-        return { ...result, id: result._id.toString() };
+        return convertList(result);
     }
 
     async deleteItem(listId: string, itemId: string): Promise<List> {
@@ -120,6 +134,6 @@ export class ListsService {
         );
 
         if (!result) throw new Error(`Failed to delete item ${itemId} from list ${listId}`);
-        return { ...result, id: result._id.toString() };
+        return convertList(result);
     }
 }

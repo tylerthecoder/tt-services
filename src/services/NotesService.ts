@@ -19,7 +19,7 @@ export class NotesService {
 
   async getAllNotes(): Promise<Note[]> {
     const results = await this.noteCollection.find({ deleted: { $ne: true } }).sort({ date: -1 }).toArray();
-    return results.map(result => convertNote(result));
+    return results.map(convertNote);
   }
 
   async getAllNotesMetadata(): Promise<NoteMetadata[]> {
@@ -27,7 +27,7 @@ export class NotesService {
       .find({ deleted: { $ne: true } }, { projection: { content: 0 } })
       .sort({ date: -1 })
       .toArray();
-    return results.map(result => convertNote(result));
+    return results.map(convertNote);
   }
 
   async getNotesMetadataByTag(tag: string): Promise<NoteMetadata[]> {
@@ -35,7 +35,7 @@ export class NotesService {
       .find({ deleted: { $ne: true }, tags: tag }, { projection: { content: 0 } })
       .sort({ date: -1 })
       .toArray();
-    return results.map(result => convertNote(result));
+    return results.map(convertNote);
   }
 
   async getPublishedNotes(): Promise<Note[]> {
@@ -43,7 +43,7 @@ export class NotesService {
       .find({ published: true })
       .sort({ date: -1 })
       .toArray();
-    return results.map(result => convertNote(result));
+    return results.map(convertNote);
   }
 
   async getNoteById(id: string): Promise<Note | null> {
@@ -58,7 +58,7 @@ export class NotesService {
 
   async getNotesByIds(ids: string[]): Promise<Note[]> {
     const results = await this.noteCollection.find({ _id: { $in: ids.map(id => new ObjectId(id)) } }).toArray();
-    return results.map(result => convertNote(result));
+    return results.map(convertNote);
   }
 
   async getNotesByDate(date: string): Promise<Note[]> {
@@ -66,7 +66,7 @@ export class NotesService {
       .find({ date: date })
       .sort({ createdAt: -1 })
       .toArray();
-    return results.map(result => convertNote(result));
+    return results.map(convertNote);
   }
 
   async getAllTags(): Promise<string[]> {
@@ -81,7 +81,7 @@ export class NotesService {
       .find({ tags: tag })
       .sort({ createdAt: -1 })
       .toArray();
-    return results.map(result => ({ ...result, id: result._id.toString() }));
+    return results.map(convertNote);
   }
 
   async createNote<T extends Note>(note: CreatableNote<T>): Promise<T> {
