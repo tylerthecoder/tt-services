@@ -28,20 +28,19 @@ export class GoogleService {
         this.oauth2Client = new OAuth2Client(
             CLIENT_SECRET.client_id,
             CLIENT_SECRET.client_secret,
-            // This redirect URI will need to match what we configure in our Next.js app
-            `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/google/callback`
         );
     }
 
     /**
      * Generate the authorization URL for OAuth2 login
      */
-    public getAuthUrl(redirectUri?: string): string {
+    public getAuthUrl(redirectUri: string, state?: string): string {
         return this.oauth2Client.generateAuthUrl({
             access_type: 'offline',
             scope: SCOPES,
-            redirect_uri: redirectUri || `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/google/callback`,
+            redirect_uri: redirectUri,
             prompt: 'consent', // Always ask for consent to ensure we get a refresh token
+            state: state
         });
     }
 
@@ -58,9 +57,12 @@ export class GoogleService {
     /**
      * Exchange the authorization code for tokens
      */
-    public async getTokens(code: string): Promise<GoogleToken> {
+    public async getTokens(code: string, redirectUri: string): Promise<GoogleToken> {
         try {
-            const { tokens } = await this.oauth2Client.getToken(code);
+            const { tokens } = await this.oauth2Client.getToken({
+                code,
+                redirect_uri: redirectUri
+            });
 
             if (!tokens.refresh_token) {
                 throw new Error('No refresh token received. User may have already granted permission without prompt:consent');
