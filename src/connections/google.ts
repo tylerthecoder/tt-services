@@ -4,8 +4,8 @@ import { GoogleToken, MongoDBService, NoId } from './mongo.ts';
 import { Logger } from 'pino';
 
 const SCOPES = [
-    'https://www.googleapis.com/auth/drive.readonly',
-    'https://www.googleapis.com/auth/documents.readonly',
+    'https://www.googleapis.com/auth/drive',
+    'https://www.googleapis.com/auth/documents',
     'https://www.googleapis.com/auth/userinfo.profile',
     'https://www.googleapis.com/auth/userinfo.email'
 ];
@@ -209,6 +209,82 @@ export class GoogleService {
         });
 
         return response.data.id || '';
+    }
+
+    public async updateGoogleDocContent(userId: string, documentId: string, requests: any[]): Promise<void> {
+        this.logger.info({ userId, documentId }, 'Updating Google Doc content');
+        const auth = await this.getAuthorizedClient(userId);
+        const docs = google.docs({ version: 'v1', auth });
+
+        await docs.documents.batchUpdate({
+            documentId,
+            requestBody: {
+                requests
+            }
+        });
+    }
+
+    public async createGoogleDocWithContent(userId: string, title: string, content: any[]): Promise<string> {
+        this.logger.info({ userId, title }, 'Creating Google Doc with content');
+
+        // First create the document
+        const documentId = await this.createGoogleDoc(userId, title);
+
+        // Then add content
+        if (content && content.length > 0) {
+            const requests = content.map((element, index) => ({
+                insertText: {
+                    location: { index: 1 + index }, // Start after title
+                    text: this.extractTextFromElement(element)
+                }
+            }));
+
+            await this.updateGoogleDocContent(userId, documentId, requests);
+        }
+
+        return documentId;
+    }
+
+    public async addTabToGoogleDoc(userId: string, documentId: string, content: any[], tabName?: string): Promise<void> {
+        this.logger.info({ userId, documentId, tabName }, 'Adding tab to Google Doc');
+        const auth = await this.getAuthorizedClient(userId);
+        const docs = google.docs({ version: 'v1', auth });
+
+        // Create a new tab (actually append content with a separator)
+        const separator = tabName ? `\n\n--- ${tabName} ---\n\n` : '\n\n--- New Section ---\n\n';
+
+        // Get current document to find end position
+        const doc = await docs.documents.get({ documentId });
+        const endIndex = doc.data.body?.content?.reduce((max, element) => {
+            const elementEndIndex = element.endIndex || 0;
+            return Math.max(max, elementEndIndex);
+        }, 0) || 1;
+
+        const requests = [
+            {
+                insertText: {
+                    location: { index: endIndex - 1 },
+                    text: separator
+                }
+            },
+            ...content.map(element => ({
+                insertText: {
+                    location: { index: endIndex - 1 },
+                    text: this.extractTextFromElement(element)
+                }
+            }))
+        ];
+
+        await this.updateGoogleDocContent(userId, documentId, requests);
+    }
+
+    private extractTextFromElement(element: any): string {
+        if (element.paragraph?.elements) {
+            return element.paragraph.elements
+                .map((e: any) => e.textRun?.content || '')
+                .join('') + '\n';
+        }
+        return '';
     }
 
     /**

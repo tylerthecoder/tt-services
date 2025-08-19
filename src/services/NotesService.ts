@@ -73,7 +73,7 @@ export class NotesService {
     // Get all unique tags from non-deleted notes
     const tags = await this.noteCollection.distinct('tags', { deleted: { $ne: true } });
     // Filter out any null or undefined values and sort alphabetically
-    return tags.filter(tag => tag !== undefined).sort();
+    return tags.filter(tag => tag !== undefined && tag !== null).sort();
   }
 
   async getNotesByTag(tag: string): Promise<Note[]> {
