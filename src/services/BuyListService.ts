@@ -1,27 +1,28 @@
 import { Collection, ObjectId } from 'mongodb';
+
 import type { NoId } from '../connections/mongo.ts';
 
 export type BuyListItem = {
-    id: string;
-    text: string;
-    completed: boolean;
-    url?: string;
-    notes?: string;
-    createdAt: string;
-    updatedAt: string;
-}
+  id: string;
+  text: string;
+  completed: boolean;
+  url?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+};
 
 export class BuyListService {
-  constructor(
-    private readonly buyListCollection: Collection<NoId<BuyListItem>>
-  ) {}
+  constructor(private readonly buyListCollection: Collection<NoId<BuyListItem>>) {}
 
   async getAllItems(): Promise<BuyListItem[]> {
     const results = await this.buyListCollection.find().toArray();
-    return results.map(result => ({ ...result, id: result._id.toString() }));
+    return results.map((result) => ({ ...result, id: result._id.toString() }));
   }
 
-  async createItem(item: Omit<BuyListItem, 'id' | 'createdAt' | 'updatedAt'>): Promise<BuyListItem> {
+  async createItem(
+    item: Omit<BuyListItem, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<BuyListItem> {
     const newItem: NoId<BuyListItem> = {
       ...item,
       createdAt: new Date().toISOString(),
@@ -32,7 +33,10 @@ export class BuyListService {
     return { ...newItem, id: result.insertedId.toString() };
   }
 
-  async updateItem(id: string, update: Partial<Omit<BuyListItem, 'id' | 'createdAt' | 'updatedAt'>>): Promise<BuyListItem> {
+  async updateItem(
+    id: string,
+    update: Partial<Omit<BuyListItem, 'id' | 'createdAt' | 'updatedAt'>>,
+  ): Promise<BuyListItem> {
     const updateDoc = {
       $set: {
         ...update,
@@ -42,7 +46,7 @@ export class BuyListService {
     const result = await this.buyListCollection.findOneAndUpdate(
       { _id: new ObjectId(id) },
       updateDoc,
-      { returnDocument: 'after' }
+      { returnDocument: 'after' },
     );
     if (!result) {
       throw new Error(`Buy list item with id ${id} not found`);
@@ -57,6 +61,6 @@ export class BuyListService {
 
   async getItemsByStatus(completed: boolean): Promise<BuyListItem[]> {
     const results = await this.buyListCollection.find({ completed }).toArray();
-    return results.map(result => ({ ...result, id: result._id.toString() }));
+    return results.map((result) => ({ ...result, id: result._id.toString() }));
   }
 }

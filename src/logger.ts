@@ -1,5 +1,5 @@
 import pino from 'pino';
 
 export const logger = pino({
-    name: 'tt-services',
+  name: 'tt-services',
 });

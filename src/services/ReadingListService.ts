@@ -1,24 +1,23 @@
 import { Collection, ObjectId } from 'mongodb';
+
 import type { NoId } from '../connections/mongo.ts';
 
 export type ReadingListItem = {
-    id: string;
-    name: string;
-    url?: string;
-    type: 'article' | 'book';
-    notes?: string;
-    createdAt: string;
-    updatedAt: string;
-}
+  id: string;
+  name: string;
+  url?: string;
+  type: 'article' | 'book';
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+};
 
 export class ReadingListService {
-  constructor(
-    private readonly readingListCollection: Collection<NoId<ReadingListItem>>
-  ) {}
+  constructor(private readonly readingListCollection: Collection<NoId<ReadingListItem>>) {}
 
   async getAllItems(): Promise<ReadingListItem[]> {
     const results = await this.readingListCollection.find().sort({ createdAt: -1 }).toArray();
-    return results.map(result => ({ ...result, id: result._id.toString() }));
+    return results.map((result) => ({ ...result, id: result._id.toString() }));
   }
 
   async getItemById(id: string): Promise<ReadingListItem | null> {
@@ -26,7 +25,9 @@ export class ReadingListService {
     return result ? { ...result, id: result._id.toString() } : null;
   }
 
-  async createItem(item: Omit<ReadingListItem, 'id' | 'createdAt' | 'updatedAt'>): Promise<ReadingListItem> {
+  async createItem(
+    item: Omit<ReadingListItem, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<ReadingListItem> {
     const newItem: NoId<ReadingListItem> = {
       ...item,
       createdAt: new Date().toISOString(),
@@ -37,7 +38,10 @@ export class ReadingListService {
     return { ...newItem, id: result.insertedId.toString() };
   }
 
-  async updateItem(id: string, update: Partial<Omit<ReadingListItem, 'id' | 'createdAt' | 'updatedAt'>>): Promise<ReadingListItem> {
+  async updateItem(
+    id: string,
+    update: Partial<Omit<ReadingListItem, 'id' | 'createdAt' | 'updatedAt'>>,
+  ): Promise<ReadingListItem> {
     const updateDoc = {
       $set: {
         ...update,
@@ -47,7 +51,7 @@ export class ReadingListService {
     const result = await this.readingListCollection.findOneAndUpdate(
       { _id: new ObjectId(id) },
       updateDoc,
-      { returnDocument: 'after' }
+      { returnDocument: 'after' },
     );
     if (!result) {
       throw new Error(`Reading list item with id ${id} not found`);
@@ -61,7 +65,10 @@ export class ReadingListService {
   }
 
   async getItemsByType(type: 'article' | 'book'): Promise<ReadingListItem[]> {
-    const results = await this.readingListCollection.find({ type }).sort({ createdAt: -1 }).toArray();
-    return results.map(result => ({ ...result, id: result._id.toString() }));
+    const results = await this.readingListCollection
+      .find({ type })
+      .sort({ createdAt: -1 })
+      .toArray();
+    return results.map((result) => ({ ...result, id: result._id.toString() }));
   }
 }

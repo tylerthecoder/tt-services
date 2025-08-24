@@ -1,7 +1,7 @@
 import { Collection, ObjectId, WithId } from 'mongodb';
+
 import type { NoId } from '../connections/mongo.ts';
 import { CreatableNote, Note, NoteMetadata } from './notes.ts';
-
 
 const convertNote = (note: WithId<NoId<Note>>): Note => {
   const new_note = {
@@ -10,15 +10,16 @@ const convertNote = (note: WithId<NoId<Note>>): Note => {
   } as Note & { _id?: ObjectId };
   delete new_note._id;
   return new_note;
-}
+};
 
 export class NotesService {
-  constructor(
-    private readonly noteCollection: Collection<NoId<Note>>
-  ) { }
+  constructor(private readonly noteCollection: Collection<NoId<Note>>) {}
 
   async getAllNotes(): Promise<Note[]> {
-    const results = await this.noteCollection.find({ deleted: { $ne: true } }).sort({ date: -1 }).toArray();
+    const results = await this.noteCollection
+      .find({ deleted: { $ne: true } })
+      .sort({ date: -1 })
+      .toArray();
     return results.map(convertNote);
   }
 
@@ -52,12 +53,17 @@ export class NotesService {
   }
 
   async getNoteMetadataById(id: string): Promise<NoteMetadata | null> {
-    const result = await this.noteCollection.findOne({ _id: new ObjectId(id) }, { projection: { content: 0 } });
+    const result = await this.noteCollection.findOne(
+      { _id: new ObjectId(id) },
+      { projection: { content: 0 } },
+    );
     return result ? convertNote(result) : null;
   }
 
   async getNotesByIds(ids: string[]): Promise<Note[]> {
-    const results = await this.noteCollection.find({ _id: { $in: ids.map(id => new ObjectId(id)) } }).toArray();
+    const results = await this.noteCollection
+      .find({ _id: { $in: ids.map((id) => new ObjectId(id)) } })
+      .toArray();
     return results.map(convertNote);
   }
 
@@ -73,14 +79,11 @@ export class NotesService {
     // Get all unique tags from non-deleted notes
     const tags = await this.noteCollection.distinct('tags', { deleted: { $ne: true } });
     // Filter out any null or undefined values and sort alphabetically
-    return tags.filter(tag => tag !== undefined).sort();
+    return tags.filter((tag) => tag !== undefined && tag !== null).sort();
   }
 
   async getNotesByTag(tag: string): Promise<Note[]> {
-    const results = await this.noteCollection
-      .find({ tags: tag })
-      .sort({ createdAt: -1 })
-      .toArray();
+    const results = await this.noteCollection.find({ tags: tag }).sort({ createdAt: -1 }).toArray();
     return results.map(convertNote);
   }
 
@@ -96,7 +99,10 @@ export class NotesService {
     return { ...newNote, id: result.insertedId.toString() } as T;
   }
 
-  async updateNote<T extends Note>(id: string, update: Partial<Omit<T, 'id' | 'createdAt' | 'updatedAt'>>): Promise<T> {
+  async updateNote<T extends Note>(
+    id: string,
+    update: Partial<Omit<T, 'id' | 'createdAt' | 'updatedAt'>>,
+  ): Promise<T> {
     const updateDoc = {
       $set: {
         ...update,
@@ -107,7 +113,7 @@ export class NotesService {
     const result = await this.noteCollection.findOneAndUpdate(
       { _id: new ObjectId(id) },
       updateDoc,
-      { returnDocument: 'after' }
+      { returnDocument: 'after' },
     );
 
     if (!result) {
@@ -133,7 +139,7 @@ export class NotesService {
     const note = await this.getNoteById(id);
     if (!note) throw new Error(`Note ${id} not found`);
 
-    const tags = (note.tags || []).filter(t => t !== tag);
+    const tags = (note.tags || []).filter((t) => t !== tag);
     return this.updateNote(id, { tags });
   }
 
@@ -156,9 +162,9 @@ export class NotesService {
       {
         $set: {
           deleted: true,
-          updatedAt: new Date().toISOString()
-        }
-      }
+          updatedAt: new Date().toISOString(),
+        },
+      },
     );
     return result.modifiedCount === 1;
   }

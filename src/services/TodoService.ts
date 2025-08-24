@@ -1,22 +1,21 @@
 import { Collection, ObjectId } from 'mongodb';
+
 import type { NoId } from '../connections/mongo.ts';
 
 export type Todo = {
-    id: string;
-    text: string;
-    completed: boolean;
-    createdAt: string;
-    updatedAt: string;
-}
+  id: string;
+  text: string;
+  completed: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
 
 export class TodoService {
-  constructor(
-    private readonly todoCollection: Collection<NoId<Todo>>
-  ) {}
+  constructor(private readonly todoCollection: Collection<NoId<Todo>>) {}
 
   async getAllTodos(): Promise<Todo[]> {
     const results = await this.todoCollection.find().toArray();
-    return results.map(result => ({ ...result, id: result._id.toString() }));
+    return results.map((result) => ({ ...result, id: result._id.toString() }));
   }
 
   async createTodo(todo: Omit<Todo, 'id' | 'createdAt' | 'updatedAt'>): Promise<Todo> {
@@ -30,7 +29,10 @@ export class TodoService {
     return { ...newTodo, id: result.insertedId.toString() };
   }
 
-  async updateTodo(id: string, update: Partial<Omit<Todo, 'id' | 'createdAt' | 'updatedAt'>>): Promise<Todo> {
+  async updateTodo(
+    id: string,
+    update: Partial<Omit<Todo, 'id' | 'createdAt' | 'updatedAt'>>,
+  ): Promise<Todo> {
     const updateDoc = {
       $set: {
         ...update,
@@ -40,7 +42,7 @@ export class TodoService {
     const result = await this.todoCollection.findOneAndUpdate(
       { _id: new ObjectId(id) },
       updateDoc,
-      { returnDocument: 'after' }
+      { returnDocument: 'after' },
     );
     if (!result) {
       throw new Error(`Todo with id ${id} not found`);
@@ -55,6 +57,6 @@ export class TodoService {
 
   async getTodosByStatus(completed: boolean): Promise<Todo[]> {
     const results = await this.todoCollection.find({ completed }).toArray();
-    return results.map(result => ({ ...result, id: result._id.toString() }));
+    return results.map((result) => ({ ...result, id: result._id.toString() }));
   }
 }

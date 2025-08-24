@@ -1,5 +1,7 @@
 {
-    "[markdown]": {
-        "editor.formatOnSave": false,
-    }
+  "[markdown]": {
+    "editor.formatOnSave": false
+  },
+  "editor.formatOnPaste": true,
+  "editor.formatOnSave": true
 }

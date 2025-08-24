@@ -1,1 +1,1 @@
-Hello **bold** and *italic* and *\**both*\**
+Hello **bold** and _italic_ and \*\*_both_\*\*

@@ -1,33 +1,33 @@
 {
-    "body": {
-        "content": [
+  "body": {
+    "content": [
+      {
+        "paragraph": {
+          "elements": [
             {
-                "paragraph": {
-                    "elements": [
-                        {
-                            "textRun": {
-                                "content": "My Title"
-                            }
-                        }
-                    ],
-                    "paragraphStyle": {
-                        "namedStyleType": "TITLE"
-                    }
-                }
-            },
-            {
-                "paragraph": {
-                    "elements": [
-                        {
-                            "textRun": {
-                                "content": "Hello world"
-                            }
-                        }
-                    ]
-                }
+              "textRun": {
+                "content": "My Title"
+              }
             }
-        ]
-    },
-    "inlineObjects": {},
-    "lists": {}
+          ],
+          "paragraphStyle": {
+            "namedStyleType": "TITLE"
+          }
+        }
+      },
+      {
+        "paragraph": {
+          "elements": [
+            {
+              "textRun": {
+                "content": "Hello world"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "inlineObjects": {},
+  "lists": {}
 }

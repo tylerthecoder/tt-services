@@ -1,70 +1,68 @@
 {
-    "body": {
-        "content": [
+  "body": {
+    "content": [
+      {
+        "paragraph": {
+          "bullet": {
+            "listId": "list-numbered",
+            "nestingLevel": 0
+          },
+          "elements": [
             {
-                "paragraph": {
-                    "bullet": {
-                        "listId": "list-numbered",
-                        "nestingLevel": 0
-                    },
-                    "elements": [
-                        {
-                            "textRun": {
-                                "content": "First item"
-                            }
-                        }
-                    ]
-                }
-            },
-            {
-                "paragraph": {
-                    "bullet": {
-                        "listId": "list-numbered",
-                        "nestingLevel": 0
-                    },
-                    "elements": [
-                        {
-                            "textRun": {
-                                "content": "Second item"
-                            }
-                        }
-                    ]
-                }
-            },
-            {
-                "paragraph": {
-                    "bullet": {
-                        "listId": "list-bulleted",
-                        "nestingLevel": 0
-                    },
-                    "elements": [
-                        {
-                            "textRun": {
-                                "content": "Bullet item"
-                            }
-                        }
-                    ]
-                }
+              "textRun": {
+                "content": "First item"
+              }
             }
-        ]
-    },
-    "lists": {
-        "list-numbered": {
-            "listProperties": {
-                "nestingLevels": [
-                    {
-                        "glyphType": "DECIMAL"
-                    }
-                ]
-            }
-        },
-        "list-bulleted": {
-            "listProperties": {
-                "nestingLevels": [
-                    {}
-                ]
-            }
+          ]
         }
+      },
+      {
+        "paragraph": {
+          "bullet": {
+            "listId": "list-numbered",
+            "nestingLevel": 0
+          },
+          "elements": [
+            {
+              "textRun": {
+                "content": "Second item"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "paragraph": {
+          "bullet": {
+            "listId": "list-bulleted",
+            "nestingLevel": 0
+          },
+          "elements": [
+            {
+              "textRun": {
+                "content": "Bullet item"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "lists": {
+    "list-numbered": {
+      "listProperties": {
+        "nestingLevels": [
+          {
+            "glyphType": "DECIMAL"
+          }
+        ]
+      }
     },
-    "inlineObjects": {}
+    "list-bulleted": {
+      "listProperties": {
+        "nestingLevels": [{}]
+      }
+    }
+  },
+  "inlineObjects": {}
 }
