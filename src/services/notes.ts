@@ -21,6 +21,7 @@ export type GoogleNoteMetadata = NoteMetadata<{
 }>;
 
 export const GOOGLE_NOTE_TAG = 'google-doc';
+export const DAILY_NOTE_TAG = 'daily-note';
 
 export const isGoogleNote = (note: Note): note is GoogleNote => {
   const hasGoogleTag = note.tags?.includes(GOOGLE_NOTE_TAG) ?? false;
@@ -32,6 +33,21 @@ export const isGoogleNoteMetadata = (note: NoteMetadata): note is GoogleNoteMeta
   const hasGoogleTag = note.tags?.includes(GOOGLE_NOTE_TAG) ?? false;
   const hasGoogleDocId = 'googleDocId' in note;
   return hasGoogleTag && hasGoogleDocId;
+};
+
+export type DailyNote = Note<{ day: string }>;
+export type DailyNoteMetadata = NoteMetadata<{ day: string }>;
+
+export const isDailyNote = (note: Note): note is DailyNote => {
+  const hasDailyTag = note.tags?.includes(DAILY_NOTE_TAG) ?? false;
+  const hasDay = 'day' in note;
+  return hasDailyTag && hasDay;
+};
+
+export const isDailyNoteMetadata = (note: NoteMetadata): note is DailyNoteMetadata => {
+  const hasDailyTag = note.tags?.includes(DAILY_NOTE_TAG) ?? false;
+  const hasDay = 'day' in note;
+  return hasDailyTag && hasDay;
 };
 
 export type NoteType = Note | GoogleNote;

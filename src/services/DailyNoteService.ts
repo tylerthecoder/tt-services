@@ -1,12 +1,9 @@
-import { Note, NoteMetadata } from './notes.ts';
+import { DAILY_NOTE_TAG, DailyNote, NoteMetadata } from './notes.ts';
 import { NotesService } from './NotesService.ts';
 
-export type DailyNote = Note<{ day: string }>;
-
 export class DailyNoteService {
-  private static readonly DAILY_NOTE_TAG = 'daily-note';
 
-  constructor(private readonly notesService: NotesService) {}
+  constructor(private readonly notesService: NotesService) { }
 
   // Helper to get the start of the day (YYYY-MM-DD)
   private getDayString(date: Date = new Date()): string {
@@ -16,7 +13,7 @@ export class DailyNoteService {
   async getToday(date: Date = new Date()): Promise<DailyNote> {
     const dayString = this.getDayString(date);
     const notes = await this.notesService.getNotesByDate(dayString);
-    const dailyNotes = notes.filter((note) => note.tags?.includes(DailyNoteService.DAILY_NOTE_TAG));
+    const dailyNotes = notes.filter((note) => note.tags?.includes(DAILY_NOTE_TAG));
 
     if (dailyNotes.length > 0) {
       // Assume the first one is the primary daily note if multiple exist for some reason
@@ -32,7 +29,7 @@ export class DailyNoteService {
     });
 
     // Add the tag to identify it as a daily note
-    await this.notesService.addTag(newNote.id, DailyNoteService.DAILY_NOTE_TAG);
+    await this.notesService.addTag(newNote.id, DAILY_NOTE_TAG);
 
     // Fetch the note again to get the tags included
     const createdNote = await this.notesService.getNoteById(newNote.id);
@@ -44,7 +41,7 @@ export class DailyNoteService {
   }
 
   async getAllNotesMetadata(): Promise<NoteMetadata[]> {
-    const notes = await this.notesService.getNotesByTag(DailyNoteService.DAILY_NOTE_TAG);
+    const notes = await this.notesService.getNotesByTag(DAILY_NOTE_TAG);
     // Map to metadata, ensuring content is excluded
     return notes.map(({ content, ...metadata }) => metadata);
   }
