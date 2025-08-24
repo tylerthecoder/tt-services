@@ -1,6 +1,6 @@
-import { OAuth2Client } from 'google-auth-library';
-import { drive_v3 } from '@googleapis/drive';
 import { docs_v1 } from '@googleapis/docs';
+import { drive_v3 } from '@googleapis/drive';
+import { OAuth2Client } from 'google-auth-library';
 import { Logger } from 'pino';
 
 import { GoogleToken, MongoDBService, NoId } from './mongo.ts';

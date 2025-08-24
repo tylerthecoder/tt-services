@@ -1,4 +1,4 @@
-import { drive_v3 } from 'googleapis';
+import { drive_v3 } from '@googleapis/drive';
 
 import { GoogleService } from '../connections/google.js';
 import { GoogleDocConverter } from './GoogleDocConverter.ts';
@@ -16,7 +16,7 @@ export class GoogleNoteService {
   constructor(
     private readonly notesService: NotesService,
     private readonly googleService: GoogleService,
-  ) {}
+  ) { }
 
   static isGoogleNote(note: Note): note is GoogleNote {
     const hasGoogleTag = note.tags?.includes(GOOGLE_NOTE_TAG) ?? false;

@@ -1,4 +1,4 @@
-import { docs_v1 } from 'googleapis';
+import { docs_v1 } from '@googleapis/docs';
 
 export class GoogleDocConverter {
   /**
