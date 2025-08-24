@@ -1,4 +1,5 @@
 import { Collection, ObjectId } from 'mongodb';
+
 import type { NoId } from '../connections/mongo.ts';
 
 export type Plan = {
@@ -7,12 +8,12 @@ export type Plan = {
   createdAt: string;
   updatedAt: string;
   text: string;
-}
+};
 
 export type DayWithNote = {
   id: string;
   day: string;
-}
+};
 
 function getCurrentDayBoundary(): Date {
   const now = new Date();
@@ -28,10 +29,7 @@ function getCurrentDayBoundary(): Date {
 }
 
 export class DailyPlansService {
-
-  constructor(
-    private readonly planCollection: Collection<NoId<Plan>>
-  ) { }
+  constructor(private readonly planCollection: Collection<NoId<Plan>>) {}
 
   async getToday(): Promise<Plan | null> {
     console.log('Getting today');
@@ -46,8 +44,8 @@ export class DailyPlansService {
     const result = await this.planCollection.findOne({
       day: {
         $gte: day.toISOString(),
-        $lt: nextDay.toISOString()
-      }
+        $lt: nextDay.toISOString(),
+      },
     });
     return result ? { ...result, id: result._id.toString() } : null;
   }
@@ -63,7 +61,10 @@ export class DailyPlansService {
     return { ...newPlan, id: result.insertedId.toString() };
   }
 
-  async updatePlan(id: string, update: Partial<Omit<Plan, 'id' | 'createdAt' | 'updatedAt'>>): Promise<Plan> {
+  async updatePlan(
+    id: string,
+    update: Partial<Omit<Plan, 'id' | 'createdAt' | 'updatedAt'>>,
+  ): Promise<Plan> {
     const updateDoc = {
       $set: {
         ...update,
@@ -73,7 +74,7 @@ export class DailyPlansService {
     const result = await this.planCollection.findOneAndUpdate(
       { _id: new ObjectId(id) },
       updateDoc,
-      { returnDocument: 'after' }
+      { returnDocument: 'after' },
     );
     if (!result) {
       throw new Error(`Plan with id ${id} not found`);
@@ -83,7 +84,7 @@ export class DailyPlansService {
 
   async getAllPlans(): Promise<Plan[]> {
     const results = await this.planCollection.find().sort({ day: -1 }).toArray();
-    return results.map(result => ({ ...result, id: result._id.toString() }));
+    return results.map((result) => ({ ...result, id: result._id.toString() }));
   }
 
   async getDaysWithNotes(): Promise<DayWithNote[]> {
@@ -92,9 +93,9 @@ export class DailyPlansService {
       .sort({ day: -1 })
       .toArray();
 
-    return results.map(result => ({
+    return results.map((result) => ({
       id: result._id.toString(),
-      day: result.day
+      day: result.day,
     }));
   }
 }

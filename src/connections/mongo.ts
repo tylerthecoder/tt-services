@@ -1,29 +1,30 @@
-import { MongoClient, Collection, ServerApiVersion } from 'mongodb';
-import { Note } from '../services/notes.ts';
-import { Plan } from '../services/DailyPlansService.ts';
-import { Todo } from '../services/TodoService.ts';
-import { BuyListItem } from '../services/BuyListService.ts';
-import { TalkNote } from '../services/TalkNotesService.ts';
-import { ReadingListItem } from '../services/ReadingListService.ts';
-import { Creation } from '../services/CreationsService.ts';
-import { Movie } from '../services/MoviesService.ts';
-import { Techie } from '../services/TechieService.ts';
-import { WeekendProject } from '../services/WeekendProjectService.ts';
-import { TimeBlock } from '../services/TimeTrackerService.ts';
-import { Week } from '../services/WeeklyService.ts';
-import { List } from '../services/ListsService.ts';
-import { Spark } from '../services/SparksService.ts';
-import { Jot } from '../services/JotsService.ts';
-import { Chat } from '../services/ChatsService.ts';
+import { Collection, MongoClient, ServerApiVersion } from 'mongodb';
 import { Logger } from 'pino';
+
+import { BuyListItem } from '../services/BuyListService.ts';
+import { Chat } from '../services/ChatsService.ts';
+import { Creation } from '../services/CreationsService.ts';
+import { Plan } from '../services/DailyPlansService.ts';
+import { Jot } from '../services/JotsService.ts';
+import { List } from '../services/ListsService.ts';
+import { Movie } from '../services/MoviesService.ts';
+import { Note } from '../services/notes.ts';
+import { ReadingListItem } from '../services/ReadingListService.ts';
 import { SessionRecord } from '../services/SessionService.ts';
+import { Spark } from '../services/SparksService.ts';
+import { TalkNote } from '../services/TalkNotesService.ts';
+import { Techie } from '../services/TechieService.ts';
+import { TimeBlock } from '../services/TimeTrackerService.ts';
+import { Todo } from '../services/TodoService.ts';
+import { WeekendProject } from '../services/WeekendProjectService.ts';
+import { Week } from '../services/WeeklyService.ts';
 
 let dbServiceInstance: MongoDBService | null = null;
 let connectPromise: Promise<MongoDBService> | null = null;
 
 export const getDatabase = async (logger: Logger): Promise<MongoDBService> => {
   logger = logger.child({
-    module: "getDatabase",
+    module: 'getDatabase',
     filename: import.meta.url,
   });
 
@@ -48,8 +49,7 @@ export const getDatabase = async (logger: Logger): Promise<MongoDBService> => {
   const instance = await connectPromise;
   logger.trace('Returning new instance');
   return instance;
-}
-
+};
 
 export type NoId<T> = Omit<T, 'id'>;
 
@@ -101,11 +101,9 @@ export class MongoDBService {
   private chatsCollection?: Collection<NoId<Chat>>;
   private sessionsCollection?: Collection<NoId<SessionRecord>>;
 
-  constructor(
-    logger: Logger,
-  ) {
+  constructor(logger: Logger) {
     this.logger = logger.child({
-      module: "MongoDBService",
+      module: 'MongoDBService',
       filename: import.meta.url,
     });
 
@@ -121,13 +119,13 @@ export class MongoDBService {
         version: ServerApiVersion.v1,
         // strict: true,
         deprecationErrors: true,
-      }
+      },
     });
   }
 
   async connect(): Promise<void> {
     try {
-      this.logger.info("Connecting to Mongodb...")
+      this.logger.info('Connecting to Mongodb...');
       const start = Date.now();
       await this.client.connect();
       const duration = Date.now() - start;
@@ -137,7 +135,9 @@ export class MongoDBService {
       this.todoCollection = database.collection<NoId<Todo>>(TODO_COLLECTION_NAME);
       this.buyListCollection = database.collection<NoId<BuyListItem>>(BUY_LIST_COLLECTION_NAME);
       this.talkNoteCollection = database.collection<NoId<TalkNote>>(TALK_NOTE_COLLECTION_NAME);
-      this.readingListCollection = database.collection<NoId<ReadingListItem>>(READING_LIST_COLLECTION_NAME);
+      this.readingListCollection = database.collection<NoId<ReadingListItem>>(
+        READING_LIST_COLLECTION_NAME,
+      );
       this.noteCollection = database.collection<NoId<Note>>(NOTES_COLLECTION_NAME);
       this.creationsCollection = database.collection<NoId<Creation>>('creations');
       this.sparkCollection = database.collection<NoId<Spark>>('sparks');
@@ -147,7 +147,9 @@ export class MongoDBService {
       this.timeBlockCollection = database.collection<NoId<TimeBlock>>(TIME_BLOCK_COLLECTION_NAME);
       this.weekCollection = database.collection<NoId<Week>>('weeks');
       this.listCollection = database.collection<NoId<List>>('lists');
-      this.googleTokenCollection = database.collection<NoId<GoogleToken>>(GOOGLE_TOKEN_COLLECTION_NAME);
+      this.googleTokenCollection = database.collection<NoId<GoogleToken>>(
+        GOOGLE_TOKEN_COLLECTION_NAME,
+      );
       this.jotsCollection = database.collection<NoId<Jot>>(JOTS_COLLECTION_NAME);
       this.chatsCollection = database.collection<NoId<Chat>>(CHATS_COLLECTION_NAME);
       this.sessionsCollection = database.collection<NoId<SessionRecord>>(SESSIONS_COLLECTION_NAME);
@@ -165,98 +167,126 @@ export class MongoDBService {
 
   getPlanCollection(): Collection<NoId<Plan>> {
     if (!this.planCollection) {
-      throw new Error('MongoDB plan collection is not initialized. Did you forget to call connect()?');
+      throw new Error(
+        'MongoDB plan collection is not initialized. Did you forget to call connect()?',
+      );
     }
     return this.planCollection;
   }
 
   getTodoCollection(): Collection<NoId<Todo>> {
     if (!this.todoCollection) {
-      throw new Error('MongoDB todo collection is not initialized. Did you forget to call connect()?');
+      throw new Error(
+        'MongoDB todo collection is not initialized. Did you forget to call connect()?',
+      );
     }
     return this.todoCollection;
   }
 
   getBuyListCollection(): Collection<NoId<BuyListItem>> {
     if (!this.buyListCollection) {
-      throw new Error('MongoDB buy list collection is not initialized. Did you forget to call connect()?');
+      throw new Error(
+        'MongoDB buy list collection is not initialized. Did you forget to call connect()?',
+      );
     }
     return this.buyListCollection;
   }
 
   getTalkNoteCollection(): Collection<NoId<TalkNote>> {
     if (!this.talkNoteCollection) {
-      throw new Error('MongoDB talk note collection is not initialized. Did you forget to call connect()?');
+      throw new Error(
+        'MongoDB talk note collection is not initialized. Did you forget to call connect()?',
+      );
     }
     return this.talkNoteCollection;
   }
 
   getReadingListCollection(): Collection<NoId<ReadingListItem>> {
     if (!this.readingListCollection) {
-      throw new Error('MongoDB reading list collection is not initialized. Did you forget to call connect()?');
+      throw new Error(
+        'MongoDB reading list collection is not initialized. Did you forget to call connect()?',
+      );
     }
     return this.readingListCollection;
   }
 
   getNoteCollection(): Collection<NoId<Note>> {
     if (!this.noteCollection) {
-      throw new Error('MongoDB note collection is not initialized. Did you forget to call connect()?');
+      throw new Error(
+        'MongoDB note collection is not initialized. Did you forget to call connect()?',
+      );
     }
     return this.noteCollection;
   }
 
   getCreationsCollection(): Collection<NoId<Creation>> {
     if (!this.creationsCollection) {
-      throw new Error('MongoDB creations collection is not initialized. Did you forget to call connect()?');
+      throw new Error(
+        'MongoDB creations collection is not initialized. Did you forget to call connect()?',
+      );
     }
     return this.creationsCollection;
   }
 
   getSparkCollection(): Collection<NoId<Spark>> {
     if (!this.sparkCollection) {
-      throw new Error('MongoDB spark collection is not initialized. Did you forget to call connect()?');
+      throw new Error(
+        'MongoDB spark collection is not initialized. Did you forget to call connect()?',
+      );
     }
     return this.sparkCollection;
   }
 
   getMoviesCollection(): Collection<NoId<Movie>> {
     if (!this.moviesCollection) {
-      throw new Error('MongoDB movies collection is not initialized. Did you forget to call connect()?');
+      throw new Error(
+        'MongoDB movies collection is not initialized. Did you forget to call connect()?',
+      );
     }
     return this.moviesCollection;
   }
 
   getTechieCollection(): Collection<NoId<Techie>> {
     if (!this.techieCollection) {
-      throw new Error('MongoDB techie collection is not initialized. Did you forget to call connect()?');
+      throw new Error(
+        'MongoDB techie collection is not initialized. Did you forget to call connect()?',
+      );
     }
     return this.techieCollection;
   }
 
   getWeekendProjectCollection(): Collection<NoId<WeekendProject>> {
     if (!this.weekendProjectCollection) {
-      throw new Error('MongoDB weekend project collection is not initialized. Did you forget to call connect()?');
+      throw new Error(
+        'MongoDB weekend project collection is not initialized. Did you forget to call connect()?',
+      );
     }
     return this.weekendProjectCollection;
   }
 
   getTimeBlockCollection(): Collection<NoId<TimeBlock>> {
     if (!this.timeBlockCollection) {
-      throw new Error('MongoDB time block collection is not initialized. Did you forget to call connect()?');
+      throw new Error(
+        'MongoDB time block collection is not initialized. Did you forget to call connect()?',
+      );
     }
     return this.timeBlockCollection;
   }
 
   getWeekCollection(): Collection<NoId<Week>> {
     if (!this.weekCollection) {
-      throw new Error('MongoDB week collection is not initialized. Did you forget to call connect()?');
+      throw new Error(
+        'MongoDB week collection is not initialized. Did you forget to call connect()?',
+      );
     }
     return this.weekCollection;
   }
 
   getListCollection(): Collection<NoId<List>> {
     if (!this.listCollection) {
-      throw new Error('MongoDB list collection is not initialized. Did you forget to call connect()?');
+      throw new Error(
+        'MongoDB list collection is not initialized. Did you forget to call connect()?',
+      );
     }
     return this.listCollection;
   }
@@ -264,7 +294,9 @@ export class MongoDBService {
   // Add getter for Google token collection
   getGoogleTokenCollection(): Collection<NoId<GoogleToken>> {
     if (!this.googleTokenCollection) {
-      throw new Error('MongoDB Google token collection is not initialized. Did you forget to call connect()?');
+      throw new Error(
+        'MongoDB Google token collection is not initialized. Did you forget to call connect()?',
+      );
     }
     return this.googleTokenCollection;
   }
@@ -272,21 +304,27 @@ export class MongoDBService {
   // Add getter for Jots collection
   getJotsCollection(): Collection<NoId<Jot>> {
     if (!this.jotsCollection) {
-      throw new Error('MongoDB Jots collection is not initialized. Did you forget to call connect()?');
+      throw new Error(
+        'MongoDB Jots collection is not initialized. Did you forget to call connect()?',
+      );
     }
     return this.jotsCollection;
   }
 
   getChatsCollection(): Collection<NoId<Chat>> {
     if (!this.chatsCollection) {
-      throw new Error('MongoDB Chats collection is not initialized. Did you forget to call connect()?');
+      throw new Error(
+        'MongoDB Chats collection is not initialized. Did you forget to call connect()?',
+      );
     }
     return this.chatsCollection;
   }
 
   getSessionsCollection(): Collection<NoId<SessionRecord>> {
     if (!this.sessionsCollection) {
-      throw new Error('MongoDB Sessions collection is not initialized. Did you forget to call connect()?');
+      throw new Error(
+        'MongoDB Sessions collection is not initialized. Did you forget to call connect()?',
+      );
     }
     return this.sessionsCollection;
   }
