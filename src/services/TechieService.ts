@@ -1,4 +1,4 @@
-import { Note } from './notes.ts';
+import { Note } from '../notes/notes.ts';
 import { NotesService } from './NotesService.ts';
 
 export type Techie = Note<{ url?: string }>;
@@ -6,7 +6,7 @@ export type Techie = Note<{ url?: string }>;
 export class TechieService {
   private static readonly TECHIE_TAG = 'techie';
 
-  constructor(private readonly notesService: NotesService) {}
+  constructor(private readonly notesService: NotesService) { }
 
   async getAllTechies(): Promise<Techie[]> {
     const notes = await this.notesService.getNotesByTag(TechieService.TECHIE_TAG);

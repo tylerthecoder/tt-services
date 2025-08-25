@@ -1,7 +1,7 @@
 import { Collection, ObjectId, WithId } from 'mongodb';
 
 import type { NoId } from '../connections/mongo.ts';
-import { CreatableNote, Note, NoteMetadata } from './notes.ts';
+import { CreatableNote, Note, NoteMetadata } from '../notes/notes.ts';
 
 const convertNote = (note: WithId<NoId<Note>>): Note => {
   const new_note = {
@@ -13,7 +13,7 @@ const convertNote = (note: WithId<NoId<Note>>): Note => {
 };
 
 export class NotesService {
-  constructor(private readonly noteCollection: Collection<NoId<Note>>) {}
+  constructor(private readonly noteCollection: Collection<NoId<Note>>) { }
 
   async getAllNotes(): Promise<Note[]> {
     const results = await this.noteCollection

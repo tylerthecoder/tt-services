@@ -1,10 +1,10 @@
 import { Logger } from 'pino';
 
 import { GoogleService } from '../connections/google.ts';
-import { GoogleNoteService } from './GoogleNoteService.ts';
+import { GoogleNoteService } from '../notes/GoogleNoteService.ts';
 import { MarkdownToGoogleDocConverter } from './MarkdownToGoogleDocConverter.ts';
-import { Note } from './notes.ts';
-import { GoogleNote } from './notes.ts';
+import { Note } from '../notes/notes.ts';
+import { GoogleNote } from '../notes/notes.ts';
 import { NotesService } from './NotesService.ts';
 
 export interface PushToGoogleResult {
@@ -21,7 +21,7 @@ export class GooglePushService {
     private readonly notesService: NotesService,
     private readonly googleNoteService: GoogleNoteService,
     private readonly logger: Logger,
-  ) {}
+  ) { }
 
   /**
    * Push a note to Google Drive

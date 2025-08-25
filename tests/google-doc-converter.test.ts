@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test';
 
-import { GoogleDocConverter } from '../src/services/GoogleDocConverter.ts';
+import { GoogleDocConverter } from '../src/notes/GoogleDocConverter.ts';
 
 function normalize(text: string): string {
   return text

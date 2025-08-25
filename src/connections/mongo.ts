@@ -8,7 +8,7 @@ import { Plan } from '../services/DailyPlansService.ts';
 import { Jot } from '../services/JotsService.ts';
 import { List } from '../services/ListsService.ts';
 import { Movie } from '../services/MoviesService.ts';
-import { Note } from '../services/notes.ts';
+import { Note } from '../notes/notes.ts';
 import { ReadingListItem } from '../services/ReadingListService.ts';
 import { SessionRecord } from '../services/SessionService.ts';
 import { Spark } from '../services/SparksService.ts';

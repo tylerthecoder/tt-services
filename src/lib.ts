@@ -4,17 +4,17 @@ import { Logger } from 'pino';
 import { GoogleService } from './connections/google.ts';
 import { getDatabase, MongoDBService } from './connections/mongo.ts';
 import { logger as defaultLogger } from './logger.ts';
+import { DailyNoteService } from './notes/DailyNoteService.ts';
+import { GoogleNoteService } from './notes/GoogleNoteService.ts';
+import { NotesService } from './notes/NotesService.ts';
 import { BuyListService } from './services/BuyListService.ts';
 import { ChatsService } from './services/ChatsService.ts';
 import { CreationsService } from './services/CreationsService.ts';
-import { DailyNoteService } from './services/DailyNoteService.ts';
 import { DailyPlansService } from './services/DailyPlansService.ts';
-import { GoogleNoteService } from './services/GoogleNoteService.ts';
 import { GooglePushService } from './services/GooglePushService.ts';
 import { JotsService } from './services/JotsService.ts';
 import { ListsService } from './services/ListsService.ts';
 import { MoviesService } from './services/MoviesService.ts';
-import { NotesService } from './services/NotesService.ts';
 import { ReadingListService } from './services/ReadingListService.ts';
 import { SessionService } from './services/SessionService.ts';
 import { SparksService } from './services/SparksService.ts';
@@ -54,7 +54,7 @@ export class TylersThings {
     public readonly chats: ChatsService,
     public readonly sessions: SessionService,
     public readonly googlePush: GooglePushService,
-  ) {}
+  ) { }
 
   static async make(
     config: {

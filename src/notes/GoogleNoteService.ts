@@ -1,6 +1,6 @@
 import { drive_v3 } from '@googleapis/drive';
 
-import { GoogleService } from '../connections/google.js';
+import { GoogleService } from '../connections/google.ts';
 import { GoogleDocConverter } from './GoogleDocConverter.ts';
 import {
   GOOGLE_NOTE_TAG,

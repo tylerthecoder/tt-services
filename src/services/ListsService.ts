@@ -6,6 +6,7 @@ export type ListItem = {
   id: string;
   content: string;
   checked: boolean;
+  archived: boolean;
   createdAt: string;
   updatedAt: string;
   noteId?: string;
@@ -34,12 +35,9 @@ export const convertList = (list: WithId<NoId<List>>): List => {
 };
 
 export class ListsService {
-  constructor(private readonly listCollection: Collection<NoId<List>>) {}
+  constructor(private readonly listCollection: Collection<NoId<List>>) { }
 
-  async getAllLists(): Promise<List[]> {
-    const results = await this.listCollection.find().sort({ createdAt: -1 }).toArray();
-    return results.map(convertList);
-  }
+
 
   async getListById(id: string): Promise<List | null> {
     const result = await this.listCollection.findOne({ _id: new ObjectId(id) });
@@ -67,6 +65,7 @@ export class ListsService {
     const newItem: Omit<ListItem, 'id'> = {
       content,
       checked: false,
+      archived: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -139,5 +138,61 @@ export class ListsService {
 
     if (!result) throw new Error(`Failed to delete item ${itemId} from list ${listId}`);
     return convertList(result);
+  }
+
+  async archiveItem(listId: string, itemId: string): Promise<List> {
+    const result = await this.listCollection.findOneAndUpdate(
+      { _id: new ObjectId(listId), 'items.id': itemId },
+      {
+        $set: {
+          'items.$.archived': true,
+          'items.$.updatedAt': new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+      },
+      { returnDocument: 'after' },
+    );
+
+    if (!result) throw new Error(`Failed to archive item ${itemId} in list ${listId}`);
+    return convertList(result);
+  }
+
+  async unarchiveItem(listId: string, itemId: string): Promise<List> {
+    const result = await this.listCollection.findOneAndUpdate(
+      { _id: new ObjectId(listId), 'items.id': itemId },
+      {
+        $set: {
+          'items.$.archived': false,
+          'items.$.updatedAt': new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+      },
+      { returnDocument: 'after' },
+    );
+
+    if (!result) throw new Error(`Failed to unarchive item ${itemId} in list ${listId}`);
+    return convertList(result);
+  }
+
+  async getArchivedItems(listId: string): Promise<ListItem[]> {
+    const list = await this.getListById(listId);
+    if (!list) throw new Error(`List ${listId} not found`);
+
+    return list.items.filter(item => item.archived);
+  }
+
+  async getAllLists(includeArchived: boolean = false): Promise<List[]> {
+    const results = await this.listCollection.find().sort({ createdAt: -1 }).toArray();
+    const lists = results.map(convertList);
+
+    if (!includeArchived) {
+      // Filter out archived items from each list
+      return lists.map(list => ({
+        ...list,
+        items: list.items.filter(item => !item.archived)
+      }));
+    }
+
+    return lists;
   }
 }
