@@ -2,8 +2,7 @@ import { DAILY_NOTE_TAG, DailyNote, NoteMetadata } from './notes.ts';
 import { NotesService } from './NotesService.ts';
 
 export class DailyNoteService {
-
-  constructor(private readonly notesService: NotesService) { }
+  constructor(private readonly notesService: NotesService) {}
 
   // Helper to get the start of the day (YYYY-MM-DD)
   private getDayString(date: Date = new Date()): string {

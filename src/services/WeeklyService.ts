@@ -1,7 +1,7 @@
 import { Collection, ObjectId, WithId } from 'mongodb';
 
 import { NoId } from '../connections/mongo.ts';
-import { NotesService } from './NotesService.ts';
+import { NotesService } from '../notes/NotesService.ts';
 
 export type WeekTodo = {
   id: string;

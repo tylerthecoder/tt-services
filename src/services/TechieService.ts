@@ -1,5 +1,5 @@
-import { Note } from './notes.ts';
-import { NotesService } from './NotesService.ts';
+import { Note } from '../notes/notes.ts';
+import { NotesService } from '../notes/NotesService.ts';
 
 export type Techie = Note<{ url?: string }>;
 

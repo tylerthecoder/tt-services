@@ -1,6 +1,7 @@
 import { Collection, MongoClient, ServerApiVersion } from 'mongodb';
 import { Logger } from 'pino';
 
+import { Note } from '../notes/notes.ts';
 import { BuyListItem } from '../services/BuyListService.ts';
 import { Chat } from '../services/ChatsService.ts';
 import { Creation } from '../services/CreationsService.ts';
@@ -8,7 +9,6 @@ import { Plan } from '../services/DailyPlansService.ts';
 import { Jot } from '../services/JotsService.ts';
 import { List } from '../services/ListsService.ts';
 import { Movie } from '../services/MoviesService.ts';
-import { Note } from '../services/notes.ts';
 import { ReadingListItem } from '../services/ReadingListService.ts';
 import { SessionRecord } from '../services/SessionService.ts';
 import { Spark } from '../services/SparksService.ts';

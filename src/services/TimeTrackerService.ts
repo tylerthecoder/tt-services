@@ -1,4 +1,4 @@
-import { Collection, ObjectId } from 'mongodb';
+import { Collection, ObjectId, WithId } from 'mongodb';
 
 import type { NoId } from '../connections/mongo.ts';
 
@@ -7,8 +7,18 @@ export type TimeBlock = {
   startTime: string; // ISO string
   endTime?: string; // ISO string, optional
   label: string;
+  noteId?: string;
   createdAt: string;
   updatedAt: string;
+};
+
+const convertTimeBlock = (timeBlock: WithId<NoId<TimeBlock>>): TimeBlock => {
+  const new_time_block = {
+    ...timeBlock,
+    id: timeBlock._id.toString(),
+  } as TimeBlock & { _id?: ObjectId };
+  delete new_time_block._id;
+  return new_time_block;
 };
 
 export class TimeTrackerService {
@@ -19,10 +29,10 @@ export class TimeTrackerService {
     const result = await this.timeBlockCollection.findOne({
       endTime: { $exists: false },
     });
-    return result ? { ...result, id: result._id.toString() } : null;
+    return result ? convertTimeBlock(result as WithId<NoId<TimeBlock>>) : null;
   }
 
-  async startTimeBlock(label: string): Promise<TimeBlock> {
+  async startTimeBlock(label: string, noteId?: string): Promise<TimeBlock> {
     console.log('Starting time block');
     const currentBlock = await this.getCurrentTimeBlock();
     if (currentBlock) {
@@ -32,6 +42,7 @@ export class TimeTrackerService {
     const newBlock: NoId<TimeBlock> = {
       startTime: new Date().toISOString(),
       label,
+      noteId,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -63,7 +74,7 @@ export class TimeTrackerService {
       throw new Error(`Failed to end time block with id ${currentBlock.id}`);
     }
 
-    return { ...result, id: result._id.toString() };
+    return convertTimeBlock(result as WithId<NoId<TimeBlock>>);
   }
 
   async getTimeBlocksForDay(date: string): Promise<TimeBlock[]> {
@@ -99,6 +110,62 @@ export class TimeTrackerService {
       .sort({ startTime: -1 })
       .toArray();
 
-    return results.map((result) => ({ ...result, id: result._id.toString() }));
+    return results.map((result) => convertTimeBlock(result as WithId<NoId<TimeBlock>>));
+  }
+
+  async getAllTimeBlocks(): Promise<TimeBlock[]> {
+    console.log('Getting all time blocks');
+    const results = await this.timeBlockCollection.find({}).sort({ startTime: -1 }).toArray();
+    return results.map((result) => convertTimeBlock(result as WithId<NoId<TimeBlock>>));
+  }
+
+  async updateTimeBlock(
+    id: string,
+    updates: {
+      startTime?: string;
+      endTime?: string | null;
+      label?: string;
+      noteId?: string | null;
+    },
+  ): Promise<TimeBlock> {
+    console.log('Updating time block', id);
+    const setFields: Record<string, unknown> = {
+      updatedAt: new Date().toISOString(),
+    };
+    const unsetFields: Record<string, ''> = {};
+
+    if (typeof updates.startTime === 'string') {
+      setFields.startTime = updates.startTime;
+    }
+    if (typeof updates.label === 'string') {
+      setFields.label = updates.label;
+    }
+    if (updates.endTime === null) {
+      unsetFields.endTime = '';
+    } else if (typeof updates.endTime === 'string') {
+      setFields.endTime = updates.endTime;
+    }
+    if (updates.noteId === null) {
+      unsetFields.noteId = '';
+    } else if (typeof updates.noteId === 'string') {
+      setFields.noteId = updates.noteId;
+    }
+
+    const update: Record<string, unknown> = { $set: setFields };
+    if (Object.keys(unsetFields).length > 0) {
+      (update as any).$unset = unsetFields;
+    }
+
+    const result = await this.timeBlockCollection.findOneAndUpdate(
+      { _id: new ObjectId(id) },
+      update,
+      { returnDocument: 'after' },
+    );
+
+    if (!result) {
+      throw new Error(`Failed to update time block with id ${id}`);
+    }
+
+    return convertTimeBlock(result as WithId<NoId<TimeBlock>>);
   }
 }

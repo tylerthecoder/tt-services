@@ -1,19 +1,26 @@
 export { makeAgent } from './agent/agent.ts';
 export { GoogleService } from './connections/google.ts';
 export { TylersThings } from './lib.ts';
+export { GoogleNoteService } from './notes/GoogleNoteService.ts';
+export type {
+  DailyNote,
+  DailyNoteMetadata,
+  GoogleNote,
+  Note,
+  NoteMetadata,
+  NoteType,
+} from './notes/notes.ts';
+export { isGoogleNote } from './notes/notes.ts';
+export { NotesService } from './notes/NotesService.ts';
 export type { BuyListItem } from './services/BuyListService.ts';
 export type { Chat, ChatMessage, ChatMessageRole, CreatableChat } from './services/ChatsService.ts';
 export { ChatsService } from './services/ChatsService.ts';
 export type { Creation } from './services/CreationsService.ts';
 export type { Plan } from './services/DailyPlansService.ts';
-export { GoogleNoteService } from './services/GoogleNoteService.ts';
 export { GoogleTokenService } from './services/GoogleTokenService.ts';
 export type { List, ListItem } from './services/ListsService.ts';
 export { ListsService } from './services/ListsService.ts';
 export type { Movie } from './services/MoviesService.ts';
-export type { DailyNote, DailyNoteMetadata, GoogleNote, Note, NoteMetadata, NoteType } from './services/notes.ts';
-export { isGoogleNote } from './services/notes.ts';
-export { NotesService } from './services/NotesService.ts';
 export type { ReadingListItem } from './services/ReadingListService.ts';
 export type { SessionRecord } from './services/SessionService.ts';
 export type { Spark } from './services/SparksService.ts';
