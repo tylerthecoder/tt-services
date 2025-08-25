@@ -2,10 +2,10 @@ import { Logger } from 'pino';
 
 import { GoogleService } from '../connections/google.ts';
 import { GoogleNoteService } from '../notes/GoogleNoteService.ts';
-import { MarkdownToGoogleDocConverter } from './MarkdownToGoogleDocConverter.ts';
 import { Note } from '../notes/notes.ts';
 import { GoogleNote } from '../notes/notes.ts';
-import { NotesService } from './NotesService.ts';
+import { NotesService } from '../notes/NotesService.ts';
+import { MarkdownToGoogleDocConverter } from './MarkdownToGoogleDocConverter.ts';
 
 export interface PushToGoogleResult {
   success: boolean;
@@ -153,7 +153,7 @@ export class GooglePushService {
       const notes = await Promise.all(noteIds.map((id) => this.notesService.getNoteById(id)));
 
       // Filter out null notes
-      const validNotes = notes.filter((note): note is Note => note !== null);
+      const validNotes = notes.filter((note: Note | null): note is Note => note !== null);
 
       if (validNotes.length === 0) {
         throw new Error('No valid notes found');

@@ -193,10 +193,7 @@ export class GoogleService {
   /**
    * Get a single Drive file's metadata by id
    */
-  public async getDriveFileMetadata(
-    userId: string,
-    fileId: string,
-  ): Promise<drive_v3.Schema$File> {
+  public async getDriveFileMetadata(userId: string, fileId: string): Promise<drive_v3.Schema$File> {
     try {
       const drive = await this.getDriveClient(userId);
 

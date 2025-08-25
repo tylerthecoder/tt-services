@@ -35,9 +35,7 @@ export const convertList = (list: WithId<NoId<List>>): List => {
 };
 
 export class ListsService {
-  constructor(private readonly listCollection: Collection<NoId<List>>) { }
-
-
+  constructor(private readonly listCollection: Collection<NoId<List>>) {}
 
   async getListById(id: string): Promise<List | null> {
     const result = await this.listCollection.findOne({ _id: new ObjectId(id) });
@@ -178,7 +176,7 @@ export class ListsService {
     const list = await this.getListById(listId);
     if (!list) throw new Error(`List ${listId} not found`);
 
-    return list.items.filter(item => item.archived);
+    return list.items.filter((item) => item.archived);
   }
 
   async getAllLists(includeArchived: boolean = false): Promise<List[]> {
@@ -187,9 +185,9 @@ export class ListsService {
 
     if (!includeArchived) {
       // Filter out archived items from each list
-      return lists.map(list => ({
+      return lists.map((list) => ({
         ...list,
-        items: list.items.filter(item => !item.archived)
+        items: list.items.filter((item) => !item.archived),
       }));
     }
 

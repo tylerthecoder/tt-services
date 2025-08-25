@@ -4,13 +4,8 @@
     "node": true,
     "es2021": true
   },
-  "extends": [
-    "eslint:recommended",
-    "prettier"
-  ],
-  "plugins": [
-    "simple-import-sort"
-  ],
+  "extends": ["eslint:recommended", "prettier"],
+  "plugins": ["simple-import-sort"],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaVersion": 2021,
@@ -31,8 +26,5 @@
       }
     }
   ],
-  "ignorePatterns": [
-    "dist",
-    "node_modules"
-  ]
+  "ignorePatterns": ["dist", "node_modules"]
 }

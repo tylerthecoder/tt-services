@@ -22,7 +22,7 @@ const convertTimeBlock = (timeBlock: WithId<NoId<TimeBlock>>): TimeBlock => {
 };
 
 export class TimeTrackerService {
-  constructor(private readonly timeBlockCollection: Collection<NoId<TimeBlock>>) { }
+  constructor(private readonly timeBlockCollection: Collection<NoId<TimeBlock>>) {}
 
   private async getCurrentTimeBlock(): Promise<TimeBlock | null> {
     console.log('Getting current time block');

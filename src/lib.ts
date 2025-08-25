@@ -54,7 +54,7 @@ export class TylersThings {
     public readonly chats: ChatsService,
     public readonly sessions: SessionService,
     public readonly googlePush: GooglePushService,
-  ) { }
+  ) {}
 
   static async make(
     config: {

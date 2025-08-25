@@ -2,7 +2,14 @@ export { makeAgent } from './agent/agent.ts';
 export { GoogleService } from './connections/google.ts';
 export { TylersThings } from './lib.ts';
 export { GoogleNoteService } from './notes/GoogleNoteService.ts';
-export type { DailyNote, DailyNoteMetadata, GoogleNote, Note, NoteMetadata, NoteType } from './notes/notes.ts';
+export type {
+  DailyNote,
+  DailyNoteMetadata,
+  GoogleNote,
+  Note,
+  NoteMetadata,
+  NoteType,
+} from './notes/notes.ts';
 export { isGoogleNote } from './notes/notes.ts';
 export { NotesService } from './notes/NotesService.ts';
 export type { BuyListItem } from './services/BuyListService.ts';

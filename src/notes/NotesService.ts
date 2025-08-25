@@ -13,7 +13,7 @@ const convertNote = (note: WithId<NoId<Note>>): Note => {
 };
 
 export class NotesService {
-  constructor(private readonly noteCollection: Collection<NoId<Note>>) { }
+  constructor(private readonly noteCollection: Collection<NoId<Note>>) {}
 
   async getAllNotes(): Promise<Note[]> {
     const results = await this.noteCollection
