@@ -41,20 +41,23 @@ export class NotesService {
 
   async getPublishedNotes(): Promise<Note[]> {
     const results = await this.noteCollection
-      .find({ published: true })
+      .find({ published: true, deleted: { $ne: true } })
       .sort({ date: -1 })
       .toArray();
     return results.map(convertNote);
   }
 
   async getNoteById(id: string): Promise<Note | null> {
-    const result = await this.noteCollection.findOne({ _id: new ObjectId(id) });
+    const result = await this.noteCollection.findOne({
+      _id: new ObjectId(id),
+      deleted: { $ne: true },
+    });
     return result ? convertNote(result) : null;
   }
 
   async getNoteMetadataById(id: string): Promise<NoteMetadata | null> {
     const result = await this.noteCollection.findOne(
-      { _id: new ObjectId(id) },
+      { _id: new ObjectId(id), deleted: { $ne: true } },
       { projection: { content: 0 } },
     );
     return result ? convertNote(result) : null;
@@ -62,14 +65,14 @@ export class NotesService {
 
   async getNotesByIds(ids: string[]): Promise<Note[]> {
     const results = await this.noteCollection
-      .find({ _id: { $in: ids.map((id) => new ObjectId(id)) } })
+      .find({ _id: { $in: ids.map((id) => new ObjectId(id)) }, deleted: { $ne: true } })
       .toArray();
     return results.map(convertNote);
   }
 
   async getNotesByDate(date: string): Promise<Note[]> {
     const results = await this.noteCollection
-      .find({ date: date })
+      .find({ date: date, deleted: { $ne: true } })
       .sort({ createdAt: -1 })
       .toArray();
     return results.map(convertNote);
@@ -83,7 +86,10 @@ export class NotesService {
   }
 
   async getNotesByTag(tag: string): Promise<Note[]> {
-    const results = await this.noteCollection.find({ tags: tag }).sort({ createdAt: -1 }).toArray();
+    const results = await this.noteCollection
+      .find({ tags: tag, deleted: { $ne: true } })
+      .sort({ createdAt: -1 })
+      .toArray();
     return results.map(convertNote);
   }
 
