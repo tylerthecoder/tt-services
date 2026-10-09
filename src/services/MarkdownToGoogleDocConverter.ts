@@ -1,4 +1,4 @@
-import { docs_v1 } from 'googleapis';
+import type { docs_v1 } from '@googleapis/docs';
 
 export interface GoogleDocRequest {
   title?: string;
